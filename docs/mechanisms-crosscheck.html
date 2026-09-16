@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mechanism Robustness Cross-Check</title>
+<meta name="description" content="An independently-built second pass over the same evidence base as the Mechanism Robustness page, computed without reading that page's code or numbers.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif&display=swap">
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+  table.reg { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.reg th, table.reg td { border-bottom: 1px solid var(--line); padding: 7px 8px; text-align: left; vertical-align: top; }
+  table.reg th { background: var(--bg-soft); font-weight: 600; position: sticky; top: 0; }
+  table.reg td.num, table.reg th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .scroll-table { max-height: 420px; overflow-y: auto; overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+  .flag { display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .flag.yes { background: #e8f4ea; color: #1a7a34; }
+  .flag.no { background: var(--bg-soft); color: var(--muted); }
+  .flag.pilot { background: #fdf0e0; color: #a45a10; }
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 760px) { .compare-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header class="topbar"><div class="wrap">
+  <a class="logo" href="index.html"><svg class="mark" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 13 L7 4 L11 11 L16 5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Controlled Degradation Bench</a>
+  <nav class="nav">
+    <a class="btn ghost" href="mechanisms.html">Mechanisms</a>
+    <a class="btn ghost" href="index.html#leaderboard">Leaderboard</a>
+    <a class="btn accent" href="submit.html">Submit results</a>
+  </nav>
+</div></header>
+
+<main class="wrap">
+  <section class="section" style="padding-top:40px">
+    <p class="pill muted" style="margin-bottom:12px">Independent replication · does not supersede the page it checks</p>
+    <h1 style="font-size:clamp(32px,4.5vw,48px)">Mechanism Robustness — Cross-Check</h1>
+    <p class="lede" style="margin-top:12px;max-width:74ch;font-size:15px">
+      A second, independently-built pipeline over the same evidence base as <a href="mechanisms.html">Mechanism Robustness</a> — built without reading that page's code, data or published figures. Only one comparison happens, against numbers that page's own package had already made public; every other number below was derived from scratch. Both analyses are published; neither supersedes the other.
+    </p>
+    <div class="callout" style="margin-top:16px;max-width:84ch">
+      <strong>Headline: a real bug was found and fixed before computing anything.</strong> The shared source table pools three non-exchangeable cohorts under one nominal cell label — for lead-slow/S0/range-clip it gives travel_time_s ≈127s (the true formal matrix), ≈97s (single verification runs) and ≈80s (an early pilot batch) for "the same" cell. After correcting for this, <code>range_clip</code> lands on exactly the well-known 140-run formal matrix, and the lead-slow travel-time effect reproduces to six significant figures (127.300002 → 131.440002 s, Hedges' g = 6.054). See <a href="#foundation">§ Data foundation</a>.
+    </div>
+  </section>
+
+  <section class="section" id="foundation">
+    <div class="section-head"><span class="eyebrow">Data foundation</span><span class="sub">What changed before any statistic was computed</span></div>
+    <div class="cards" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+      <div class="card"><h3 style="font-size:18px">Cohort correction</h3><div id="fnd-cohort" class="desc"></div></div>
+      <div class="card"><h3 style="font-size:18px">Deduplication</h3><div id="fnd-dedup" class="desc"></div></div>
+      <div class="card"><h3 style="font-size:18px">Sanity check</h3><div id="fnd-sanity" class="desc"></div></div>
+    </div>
+  </section>
+
+  <section class="section" id="coverage">
+    <div class="section-head"><span class="eyebrow">Mechanism coverage</span><span class="sub">Honest mapping of the plan's 4 methods onto what the data actually contains</span></div>
+    <div class="scroll-table"><table class="reg" id="cov-table"><thead><tr><th>Mechanism</th><th>Maps to</th><th class="num">Runs</th><th>Scenarios</th><th>Severities</th><th class="num">Metrics ≥3 sev.</th></tr></thead><tbody></tbody></table></div>
+    <p class="rs-note" style="margin-top:10px;font-size:12px;color:var(--muted)">Shape/geometric-noise degradation does not exist anywhere in the codebase — an exhaustive search found no injector. <span class="flag pilot">pilot</span> = channel/rate exist only in lead-stopped, entirely from early pilot batches.</p>
+  </section>
+
+  <section class="section" id="stats">
+    <div class="section-head"><span class="eyebrow">Trend &amp; interaction tests</span><span class="sub">Freshly implemented — no Jonckheere-Terpstra or ART ANOVA existed anywhere in this codebase before this pass</span></div>
+    <div class="cards" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+      <div class="card"><h3 style="font-size:16px">Jonckheere-Terpstra trend</h3><div id="stat-jt" class="desc"></div></div>
+      <div class="card"><h3 style="font-size:16px">ART-ANOVA interaction</h3><div id="stat-art" class="desc"></div></div>
+      <div class="card"><h3 style="font-size:16px">Collisions (Fisher exact)</h3><div id="stat-fisher" class="desc"></div></div>
+    </div>
+    <div class="scroll-table" style="margin-top:14px"><table class="reg" id="art-table"><thead><tr><th>Design</th><th>Metric</th><th>Interaction</th><th class="num">F</th><th class="num">p</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section class="section" id="rs">
+    <div class="section-head"><span class="eyebrow">Robustness Score</span><span class="sub">0–1, trapezoidal AUC of per-severity retention · S4 total-outage excluded (see callout)</span></div>
+    <div class="table-wrap"><div class="prose"><table class="reg" id="rs-table"><thead><tr><th>Mechanism</th><th>Axis</th><th class="num">Mean RS</th><th class="num">n metrics</th></tr></thead><tbody></tbody></table></div></div>
+    <div class="callout" style="margin-top:12px"><strong>Data artifact caught:</strong> <code>channel</code>'s S4 ("sensor destroyed") looked like perfect comfort/operation robustness — completion time falls 69.5s→15.75s, comfort metrics collapse toward zero — but this is a fast-fail/near-stop degenerate state, not genuine robustness. Excluded from every RS number here; reported as its own case study in the full report.</div>
+  </section>
+
+  <section class="section" id="breakpoints">
+    <div class="section-head"><span class="eyebrow">Breaking points</span><span class="sub">Independently-implemented broken-stick detector: LOOCV improvement ≥10%, slope-change CI excludes zero, bootstrap-stable location ≥70%</span></div>
+    <div class="grid2">
+      <div class="card"><h3>content_ratio × red-light-violator × travel_time</h3><p class="desc" id="bp-redlight"></p></div>
+      <div class="card"><h3>content_ratio × curved-urban-road × travel_time</h3><p class="desc" id="bp-curved"></p></div>
+    </div>
+    <p style="margin-top:10px;font-size:13px;color:var(--muted)">The red-light breakpoint independently lands at retained ratio <strong>0.4</strong>, close to a previously-circulated figure of 0.4567 for the same cell, with the same slope-sign pattern — resolving, in the supporting direction, a "cannot test" verdict this project's own prior skeptical audit reached on a narrower local slice.</p>
+  </section>
+
+  <section class="section" id="mediation">
+    <div class="section-head"><span class="eyebrow">Module attribution — mediation</span><span class="sub">Scoped to range_clip: the only mechanism with a no-target control scenario</span></div>
+    <div class="table-wrap"><div class="prose"><table class="reg" id="med-table"><thead><tr><th>Outcome</th><th>Mediator</th><th class="num">ρ no-target</th><th class="num">ρ with-target</th><th class="num">p with-target</th></tr></thead><tbody></tbody></table></div></div>
+    <p style="margin-top:10px;font-size:13px;color:var(--muted)">In <code>curved-urban-road</code> (no target; localisation pathway isolated), localisation metrics show essentially no correlation with behaviour (all |ρ|&lt;0.26). In target-bearing scenarios, gated recall/precision correlate strongly (ρ≈0.78, p=2.6e-13 for no-progress duration): <strong>the perception pathway, not localisation, tracks vehicle cost under range_clip.</strong></p>
+  </section>
+
+  <section class="section" id="compare">
+    <div class="section-head"><span class="eyebrow">Against the other page's published numbers</span><span class="sub">The only point this analysis reads anything from the other package — its own public README</span></div>
+    <div class="table-wrap"><div class="prose"><table class="reg"><thead><tr><th>Claim (their page)</th><th>This cross-check</th><th>Verdict</th></tr></thead><tbody id="compare-body"></tbody></table></div></div>
+  </section>
+
+  <section class="section" id="links">
+    <div class="section-head"><span class="eyebrow">Full material</span></div>
+    <p style="font-size:14px">Full report, all ~20 tables and figures: Obsidian <code>Thesis — Sensor Degradation/Robustness Cross-Check — 2026-09-16/</code>; local mirror with the deterministic pipeline: <code>ma-xie_vedgar_perception_degradation_main_analysis/results/robustness_crosscheck_20260916/</code> (<code>scripts/robustness_crosscheck_20260916/run_all.sh</code> — verified byte-identical across two consecutive runs).</p>
+  </section>
+</main>
+
+<footer><div class="wrap"><span>Controlled Degradation Bench · independent cross-check, generated 2026-09-16</span><a href="mechanisms.html">Back to Mechanism Robustness</a></div></footer>
+<script src="data/crosscheck.js"></script>
+<script>
+(function () {
+  const D = window.CDB_CROSSCHECK;
+  if (!D) { console.error("crosscheck data missing"); return; }
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const fmt = (v, d = 3) => (v === null || v === undefined || Number.isNaN(v)) ? "—" : Number(v).toFixed(d);
+  const $ = s => document.querySelector(s);
+
+  const prov = D.dedup_provenance;
+  $("#fnd-cohort").innerHTML = `${prov.runs_excluded_by_cohort_policy} runs excluded as non-exchangeable cohorts (kept, not discarded, in <code>run_level_long_excluded_cohorts.csv</code>).`;
+  $("#fnd-dedup").innerHTML = `${prov.runs_dropped_as_duplicate_slot} further runs dropped as duplicate-slot occupants of an already-filled cell.`;
+  $("#fnd-sanity").innerHTML = `range_clip → exactly <strong>140 runs</strong> (7 × S0–S3 × 5) · lead-slow travel time reproduces to 6 s.f. (g&nbsp;=&nbsp;6.054).`;
+
+  const covBody = $("#cov-table tbody");
+  const mapLabel = { range_clip: "flagship (spatial coverage)", channel: "density", rate: "transmission rate", perception_delay: "transmission rate (alt.)", semantic_target_loss: "recognition rate", content_ratio: "spatial coverage (dose)", roi_cutout: "excluded — no outcome metrics", identity: "—", content_range_clip: "—", UNKNOWN: "—" };
+  const pilotSet = new Set(["channel", "rate"]);
+  D.mechanism_summary.filter(r => r.n_metrics_qualifying_ge3sev > 0 || r.mechanism === "roi_cutout").forEach(r => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td><code>${esc(r.mechanism)}</code>${pilotSet.has(r.mechanism) ? ' <span class="flag pilot">pilot</span>' : ""}</td>
+      <td>${esc(mapLabel[r.mechanism] || "—")}</td><td class="num">${r.n_runs}</td>
+      <td style="max-width:220px">${esc(r.scenarios)}</td><td>${esc(r.severities)}</td>
+      <td class="num">${r.n_metrics_qualifying_ge3sev}</td>`;
+    covBody.appendChild(tr);
+  });
+
+  const nJt = D.jt_trends.length, nJtSig = D.jt_trends.filter(r => r.jt_p < 0.05).length;
+  $("#stat-jt").innerHTML = `${nJt} (mechanism, scenario, metric) triples tested.<br><strong>${nJtSig} significant</strong> at p&lt;0.05.`;
+  const nArt = D.art_interaction.length, nArtSig = D.art_interaction.filter(r => r.p < 0.05).length;
+  $("#stat-art").innerHTML = `${nArt} interaction tests (2 real factorial grids).<br><strong>${nArtSig} significant</strong> at p&lt;0.05 — strongest: travel_time_s &amp; ttc_critical scenario×severity under range_clip, both p&lt;1e-8.`;
+  const nColl = D.collision_rate_by_cell.filter(r => r.n_with_collision > 0).length;
+  $("#stat-fisher").innerHTML = `${D.collision_fisher.length} tests, 0 significant (expected at n=5).<br>Nonzero collisions found in <strong>${nColl}</strong> cell(s): dynamic-cut-in × range_clip at S2/S3 — single-run-driven, not robust.`;
+
+  const artBody = $("#art-table tbody");
+  [...D.art_interaction].sort((a, b) => a.p - b.p).slice(0, 8).forEach(r => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${esc(r.design)}</td><td><code>${esc(r.metric)}</code></td><td>${esc(r.interaction_tested)}</td><td class="num">${fmt(r.F, 2)}</td><td class="num">${r.p < 0.001 ? r.p.toExponential(2) : fmt(r.p, 4)}</td>`;
+    artBody.appendChild(tr);
+  });
+
+  const rsBody = $("#rs-table tbody");
+  D.rs_by_axis_mechanism.forEach(r => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td><code>${esc(r.mechanism)}</code>${pilotSet.has(r.mechanism) ? ' <span class="flag pilot">pilot</span>' : ""}</td><td>${esc(r.axis)}</td><td class="num">${fmt(r.mean, 3)}</td><td class="num">${r.count}</td>`;
+    rsBody.appendChild(tr);
+  });
+
+  const bp = D.breaking_points;
+  const rl = bp.find(r => r.mechanism === "content_ratio" && r.scenario === "red-light-violator" && r.metric === "travel_time_s");
+  const cu = bp.find(r => r.mechanism === "content_ratio" && r.scenario === "curved-urban-road" && r.metric === "travel_time_s");
+  if (rl) $("#bp-redlight").innerHTML = `split = <strong>${fmt(rl.split, 2)}</strong> · slope ${fmt(rl.slope_before, 1)} → ${fmt(rl.slope_after, 2)} · LOOCV improvement ${fmt(rl.loocv_improvement * 100, 0)}% · stability ${fmt(rl.breakpoint_stability * 100, 0)}% <span class="flag ${rl.supported ? "yes" : "no"}">${rl.supported ? "supported" : "not supported"}</span>`;
+  if (cu) $("#bp-curved").innerHTML = `split = <strong>${fmt(cu.split, 2)}</strong> · slope ${fmt(cu.slope_before, 2)} → ${fmt(cu.slope_after, 2)} · LOOCV improvement ${fmt(cu.loocv_improvement * 100, 0)}% · stability ${fmt(cu.breakpoint_stability * 100, 0)}% <span class="flag ${cu.supported ? "yes" : "no"}">${cu.supported ? "supported" : "not supported"}</span> — previously unreported`;
+
+  const medBody = $("#med-table tbody");
+  D.mediation.filter(r => r.outcome === "task_completion.no_progress_duration_s" || r.outcome === "safety.hard_braking_count").forEach(r => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td><code>${esc(r.outcome)}</code></td><td>${esc(r.mediator)}</td><td class="num">${fmt(r.rho_no_target, 2)}</td><td class="num">${fmt(r.rho_with_target, 2)}</td><td class="num">${r.p_with_target != null && r.p_with_target < 0.001 ? r.p_with_target.toExponential(2) : fmt(r.p_with_target, 3)}</td>`;
+    medBody.appendChild(tr);
+  });
+
+  const compareRows = [
+    ["508 canonical analysis-base runs", "508 runs in the same source table before correction", "same source table"],
+    ["Spatial-coverage RS 0.82–0.90", "range_clip: safety 0.87, comfort 0.89, operation 0.98", "broadly consistent range"],
+    ["Red-light travel-time breakpoint ≈0.4567", "split = 0.4, same slope-sign pattern, all 3 gates pass", '<span class="flag yes">agrees</span> — independently supports it'],
+    ["1,119 patterns / 202 high-confidence findings", "not recomputed at that granularity here", "not comparable — different product"],
+    ["NDT dropout correlates with damage, ρ 0.66 / 0.73", "range_clip: ndt_dropout_duration_s has zero variance (140/140 runs); their mediator is a different, coupled mechanism", '<span class="flag no">different scope</span> — compatible, not contradictory'],
+  ];
+  const cmpBody = $("#compare-body");
+  compareRows.forEach(([a, b, c]) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${a}</td><td>${b}</td><td>${c}</td>`;
+    cmpBody.appendChild(tr);
+  });
+})();
+</script>
+</body>
+</html>

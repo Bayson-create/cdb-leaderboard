@@ -37,6 +37,7 @@
   <a class="logo" href="index.html"><svg class="mark" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 13 L7 4 L11 11 L16 5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Controlled Degradation Bench</a>
   <nav class="nav">
     <a class="btn ghost" href="index.html#leaderboard">Leaderboard</a>
+    <a class="btn ghost" href="mechanisms-crosscheck.html">Cross-check</a>
     <a class="btn ghost" href="methodology.html">Methodology</a>
     <a class="btn accent" href="submit.html">Submit results</a>
   </nav>
@@ -52,6 +53,9 @@
     <div class="callout" style="margin-top:16px;max-width:80ch">
       <strong>Read this before the numbers.</strong> The four axes are <em>not on a common severity scale</em> and their scores are <em>not comparable in magnitude</em> to each other — only within-axis direction, rank and shape are meaningful across mechanisms. A planned <strong>shape / geometric-noise</strong> axis has no implementation anywhere in the stack (no point-jitter or range-noise injector exists) and is omitted rather than approximated. Cell sizes range from n=3 to n=17; several ladders (noted below) are excluded because they have no comparable nominal reference. Every number on this page traces to <code>robustness_analysis_20260916</code> — see <a href="#provenance">Provenance</a>.
     </div>
+    <p style="margin-top:12px;font-size:13px;color:var(--muted);max-width:80ch">
+      A second, <a href="mechanisms-crosscheck.html">independently-built cross-check</a> of this page exists &mdash; computed from scratch without reading this page's code or numbers. It agrees on the red-light breakpoint and range-clip's starting sample size, and flags one open discrepancy on the NDT/localisation mediator (now resolved as measuring different variables).
+    </p>
   </section>
 
   <section class="section" id="axes">
