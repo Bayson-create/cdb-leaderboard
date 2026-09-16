@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Controlled Degradation Bench</title>
+<meta name="description" content="Independent closed-loop evaluation of automated-driving software stacks under registered LiDAR degradation: Safety, Comfort and Operation robustness indices.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif&display=swap">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<header class="topbar"><div class="wrap">
+  <a class="logo" href="index.html"><svg class="mark" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 13 L7 4 L11 11 L16 5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Controlled Degradation Bench</a>
+  <nav class="nav">
+    <a class="btn accent" href="submit.html">Submit results</a>
+    <a class="btn" href="methodology.html">Methodology</a>
+    <a class="btn ghost icon" href="#leaderboard" aria-label="Jump to leaderboard">↓</a>
+  </nav>
+</div></header>
+
+<main class="wrap">
+  <section class="hero">
+    <div>
+      <h1>Independent<br>closed-loop evaluation<br>of AD stacks</h1>
+      <p class="lede">How much Safety, Comfort and Operation does an automated-driving software stack keep when its LiDAR information is degraded in a controlled way? The bench drives every stack through the same seven traffic tasks, four registered severities and five repeats inside a CARLA · vEDGAR · Autoware loop, and scores what the vehicle actually did.
+        <span class="note">Scores are <strong>degradation-robustness indices</strong>: S0-normalised retention of each endpoint, not absolute performance. One configuration, one map, one controller profile per entry. <a href="methodology.html">Read the methodology →</a></span></p>
+    </div>
+    <aside class="updates" id="updates" aria-label="Updates"></aside>
+  </section>
+
+  <div class="with-toc">
+    <nav class="toc" aria-label="Sections">
+      <a href="#highlights" class="active">Highlights</a>
+      <a href="#leaderboard">Leaderboard <span class="tag">· v1.0</span></a>
+      <a href="#scenarios">Scenario breakdown</a>
+      <a href="#matrix">The bench</a>
+      <a href="methodology.html">Methodology ↗</a>
+      <a href="submit.html">Submit ↗</a>
+    </nav>
+
+    <div>
+      <section class="section" id="highlights">
+        <div class="section-head"><span class="eyebrow">Highlights</span><span class="sub">Robustness index 0–100 · higher is better · 95 % run-level bootstrap interval in the table</span></div>
+        <div class="cards">
+          <div class="card"><div class="card-title"><h3><span class="swatch" style="background:var(--safety)"></span>Safety</h3><span class="pill accent">Updated</span></div><p class="desc">Collisions, minimum TTC, TTC warnings, lane invasions, MRM events, hard and severe braking — retained at S1–S3 relative to S0.</p><div class="chart" id="chart-safety"></div><div class="foot"><span>7 metrics × 7 scenarios</span><span>S3 weighted ×2</span></div></div>
+          <div class="card"><div class="card-title"><h3><span class="swatch" style="background:var(--comfort)"></span>Comfort</h3></div><p class="desc">Longitudinal jerk, jerk magnitude, yaw acceleration, yaw rate, lateral acceleration and peak deceleration — dynamic burden the passenger feels.</p><div class="chart" id="chart-comfort"></div><div class="foot"><span>6 metrics × 7 scenarios</span><span>S3 weighted ×2</span></div></div>
+          <div class="card"><div class="card-title"><h3><span class="swatch" style="background:var(--operation)"></span>Operation</h3></div><p class="desc">Completion time, no-progress duration, blocked events and route completion — the operational cost of finishing the task.</p><div class="chart" id="chart-operation"></div><div class="foot"><span>4 metrics × 7 scenarios</span><span>S3 weighted ×2</span></div></div>
+        </div>
+      </section>
+
+      <section class="section" id="leaderboard">
+        <div class="section-head"><span class="eyebrow">Leaderboard</span><span class="sub" id="lb-count"></span></div>
+        <div class="controls">
+          <input type="search" id="lb-q" placeholder="Filter, e.g. BEVFusion, CenterPoint" aria-label="Filter models">
+          <label class="chip"><span class="k">Detector:</span><select id="f-detector"></select></label>
+          <label class="chip"><span class="k">Fusion:</span><select id="f-fusion"></select></label>
+          <label class="chip"><span class="k">Controller:</span><select id="f-controller"></select></label>
+          <label class="chip"><span class="k">Status:</span><select id="f-status"></select></label>
+          <span class="spacer"></span>
+          <button class="btn ghost small expand-cols" id="expand-cols" type="button">Expand columns |→</button>
+        </div>
+        <div class="table-wrap" id="lb-wrap">
+          <table class="lb">
+            <thead>
+              <tr class="groups">
+                <th>Model</th>
+                <th colspan="4" class="grp-start"><span class="g">Robustness index</span></th>
+                <th colspan="4" class="grp-start col-abs"><span class="g">Absolute at S3 (mean over scenarios)</span></th>
+                <th colspan="2" class="grp-start col-prov"><span class="g">Provenance</span></th>
+              </tr>
+              <tr>
+                <th>Model <span class="u">creator · detector · fusion · controller</span></th>
+                <th class="sortable grp-start sorted-desc" data-sort="cdb_index">CDB Index <span class="u">equal-weight mean</span></th>
+                <th class="sortable" data-sort="safety">Safety <span class="u">0–100</span></th>
+                <th class="sortable" data-sort="comfort">Comfort <span class="u">0–100</span></th>
+                <th class="sortable" data-sort="operation">Operation <span class="u">0–100</span></th>
+                <th class="sortable grp-start col-abs" data-sort="abs_collisions">Collisions <span class="u">per run</span></th>
+                <th class="sortable col-abs" data-sort="abs_ttc">Min TTC <span class="u">s</span></th>
+                <th class="sortable col-abs" data-sort="abs_completion">Route completion <span class="u">fraction</span></th>
+                <th class="sortable col-abs" data-sort="abs_time">Completion time <span class="u">s</span></th>
+                <th class="sortable grp-start col-prov" data-sort="runs">Runs <span class="u">accepted</span></th>
+                <th class="col-prov">Verified</th>
+              </tr>
+            </thead>
+            <tbody id="lb-body"></tbody>
+          </table>
+        </div>
+        <p class="legend-note">Grey rows are configurations that exist in the reference stack (tum_models) but have not been run through the full 140-slot matrix; they carry no numbers until a validated package is submitted. Intervals are 95 % percentile bootstrap over accepted runs resampled within every scenario × severity cell (2 000 draws, seed 20260907). Absolute columns are shown for context and do not enter the index — a faster, more complete run can still collide.</p>
+      </section>
+
+      <section class="section" id="scenarios">
+        <div class="section-head"><span class="eyebrow">Scenario breakdown</span><span class="sub">Per-scenario axis index · click a cell to see the S0–S3 curves behind it</span></div>
+        <div class="controls"><label class="chip"><span class="k">Entry:</span><select id="heat-entry"></select></label></div>
+        <div id="heat"></div>
+        <div class="heat-detail" id="heat-detail"></div>
+      </section>
+
+      <section class="section" id="matrix">
+        <div class="section-head"><span class="eyebrow">The bench</span><span class="sub">What every entry is driven through</span></div>
+        <div class="grid2">
+          <div class="card">
+            <h3>Registered intervention</h3>
+            <p class="desc">Content range clip with thinning on the concatenated LiDAR cloud, applied post-capture to the perception consumer only (localisation keeps the nominal cloud). All points beyond a fixed 50 m planar range are removed, then every remaining point is kept with a seeded probability of 0.75 (S1), 0.50 (S2) or 0.25 (S3). S0 is the unmodified reference. The intervention is time-stamped (requested → applied → confirmed) on the simulation clock and verified per run.</p>
+          </div>
+          <div class="card">
+            <h3>Matrix and acceptance</h3>
+            <p class="desc">7 scenarios × 4 severities × 5 unique accepted repeats = 140 runs, 28 of 28 cells. A run enters the matrix only after the data gate accepts it: intervention records complete, sensor cadence unchanged, required stage and vehicle records present, derived files hash-verified. Rejected attempts are retained as exclusions and never fill a slot.</p>
+          </div>
+          <div class="card">
+            <h3>Fixed environment</h3>
+            <p class="desc">CARLA 0.9.16 · Town10HD · fixed Δt 0.05 s · scenario seed 20260805 · vEDGAR 1.0.3 vehicle and bridge · Autoware (TUM tum_launch) with NDT/EKF localisation · baseline MPC controller. Only the perception model / stack build differs between entries.</p>
+          </div>
+          <div class="card">
+            <h3>Seven traffic tasks</h3>
+            <p class="desc">Stopped lead · Slow lead · Urban curve · Occluded pedestrian · Cross traffic (ego signal forced green — a conflict test, not a compliance test) · Construction obstacle · Dynamic cut-in. Each task consumes spatial observation differently, which is why the index is reported per scenario before it is averaged.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer><div class="wrap">
+  <span>Controlled Degradation Bench · score spec <span data-spec></span> · data generated <span data-generated></span></span>
+  <span>Thesis: <em>An autonomous driving software benchmark for the robustness against sensor degradation</em> (TUM / Chalmers, 2026). Design language after artificialanalysis.ai.</span>
+</div></footer>
+
+<script src="data/leaderboard.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

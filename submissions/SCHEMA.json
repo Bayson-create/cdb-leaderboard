@@ -1,0 +1,19 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "cdb-submission/1.0",
+ "type": "object",
+ "required": ["schema", "entry", "runs", "provenance"],
+ "properties": {
+  "schema": {"const": "cdb-submission/1.0"},
+  "entry": {"type": "object", "required": ["id", "model", "creator", "detector", "fusion_mode", "controller_profile", "stack_version"],
+            "properties": {"id": {"type": "string"}, "model": {"type": "string"}, "creator": {"type": "string"}, "detector": {"type": "string"},
+                           "fusion_mode": {"enum": ["lidar", "camera_lidar_fusion"]}, "controller_profile": {"type": "string"},
+                           "stack_version": {"type": "string"}, "commit": {"type": ["string", "null"]}}},
+  "runs": {"type": "array", "minItems": 140, "items": {"type": "object", "required": ["run_id", "scenario", "severity", "repeat", "metrics"],
+           "properties": {"run_id": {"type": "string"},
+                          "scenario": {"enum": ["lead-stopped", "lead-slow", "curved-urban-road", "pedestrian-emerge", "red-light-violator", "construction-obstacle", "dynamic-cut-in"]},
+                          "severity": {"enum": ["S0", "S1", "S2", "S3"]}, "repeat": {"type": "integer", "minimum": 1},
+                          "metrics": {"type": "object"}, "source_sha256": {"type": "string"}}}},
+  "provenance": {"type": "object"}
+ }
+}

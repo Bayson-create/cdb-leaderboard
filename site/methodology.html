@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Methodology — Controlled Degradation Bench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif&display=swap">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<header class="topbar"><div class="wrap">
+  <a class="logo" href="index.html"><svg class="mark" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 13 L7 4 L11 11 L16 5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Controlled Degradation Bench</a>
+  <nav class="nav"><a class="btn ghost" href="index.html#leaderboard">← Leaderboard</a><a class="btn accent" href="submit.html">Submit results</a></nav>
+</div></header>
+
+<main class="wrap">
+<div class="with-toc" style="padding-top:40px">
+  <nav class="toc" aria-label="Sections">
+    <a href="#what" class="active">What is scored</a>
+    <a href="#bench">The bench</a>
+    <a href="#score">Score definition</a>
+    <a href="#metrics">Metric registry</a>
+    <a href="#uncertainty">Uncertainty</a>
+    <a href="#boundaries">Boundaries</a>
+  </nav>
+  <article class="prose">
+    <h1 style="font-size:clamp(34px,5vw,52px)">Methodology</h1>
+    <p style="margin-top:14px;color:var(--muted)">Score spec <code data-spec></code>. The scoring code is the single source of truth: <code>cdb_score/spec.py</code> and <code>cdb_score/score.py</code> in the leaderboard repository.</p>
+
+    <h2 id="what">What is scored</h2>
+    <p>The bench does not score a detector. It scores what the <em>vehicle</em> did after a controlled loss of LiDAR information travelled through the complete driving stack — detection, validation, tracking, prediction, planning, control and the vehicle interface — in a closed loop where the world reacts to the vehicle. Every entry is one fixed software configuration (perception model, fusion mode, controller profile, stack build) driven through exactly the same matrix.</p>
+    <div class="callout">The three indices are <strong>degradation-robustness indices</strong>: how much of each endpoint the configuration keeps at S1–S3 relative to its own S0 reference. They are not absolute performance and are not comparable across different maps, routes or vehicle models. The thesis behind the bench reports a scenario-conditioned <em>profile</em> rather than a scalar; the CDB Index exists so that a leaderboard can be sorted, and the per-scenario heat table is always one click away.</div>
+
+    <h2 id="bench">The bench</h2>
+    <table>
+      <tr><th>Simulator / vehicle / stack</th><td>CARLA 0.9.16, Town10HD, fixed step 0.05 s, scenario seed 20260805 · vEDGAR 1.0.3 vehicle and bridge · Autoware (TUM <code>tum_launch</code>), NDT + EKF localisation, baseline MPC controller</td></tr>
+      <tr><th>Registered intervention</th><td><code>content_range_clip</code>: on the concatenated LiDAR cloud, remove all points beyond a fixed 50 m planar range, then keep every remaining point with seeded probability 0.75 / 0.50 / 0.25 for S1 / S2 / S3; S0 is identity. Applied to the perception consumer only; localisation keeps the nominal cloud. Request, application and confirmation are stamped on the simulation clock.</td></tr>
+      <tr><th>Scenarios (7)</th><td>Stopped lead (controlled stop) · Slow lead (2.5 m/s, 30 m ahead) · Urban curve (no actor) · Occluded pedestrian (crossing from behind a parked car) · Cross traffic (vehicle entering the junction at 7 m/s; ego signal forced green) · Construction obstacle (static, blocking the lane) · Dynamic cut-in (4 m/s from the adjacent lane)</td></tr>
+      <tr><th>Matrix</th><td>7 × {S0, S1, S2, S3} × 5 unique accepted repeats = 140 runs, 28 / 28 cells. One accepted run is the unit of analysis; messages, frames and objects never increase n.</td></tr>
+      <tr><th>Acceptance gate</th><td>Intervention records complete (one request, one application, one confirmation inside the run) · sensor cadence unchanged before and after the trigger · required stage, trajectory, command and vehicle-state records present · derived files hash-verified. Rejected attempts are kept as exclusions and never occupy a slot.</td></tr>
+    </table>
+
+    <h2 id="score">Score definition</h2>
+    <p>For every scenario <em>q</em>, metric <em>m</em> on axis <em>a</em>, and severity <em>s</em> ∈ {S1, S2, S3}:</p>
+    <pre>b      = mean over the five S0 runs of m            (baseline)
+d_s    = mean over the five Ss runs of m
+w_s    = max(0, sign_m · (d_s − b))                  (worsening; sign = +1 when lower is better, −1 when higher is better)
+r_qms  = 1 − clip(w_s / scale_m(b), 0, 1)            (retention, 0…1)
+r_qm   = (r_S1 + r_S2 + 2·r_S3) / 4                  (S3 counts double)
+Axis_a = 100 · mean over q and m∈a of r_qm
+CDB    = (Safety + Comfort + Operation) / 3</pre>
+    <ul>
+      <li><strong>Improvement is not rewarded.</strong> A metric that gets better under degradation (for example a faster completion time in the cut-in task) retains 1.0, no more. The index measures loss, not gain.</li>
+      <li><strong>Scale.</strong> Each metric has a registered normalising scale so that S0 values near zero cannot blow up the ratio: mostly the S0 value with a floor, 25 % of the S0 completion time, and exactly one event for collisions and blocked events (any new collision at a severity zeroes that severity's retention).</li>
+      <li><strong>Undefined cells are skipped, not imputed.</strong> TTC metrics apply only where <code>ttc_applicable</code> is true (not on the actor-free curve); route completion is undefined for the controlled stop.</li>
+      <li><strong>No pooling across configurations.</strong> Every entry is normalised to its own S0. Two entries with different S0 behaviour can both score 100 if neither loses anything under degradation — which is the question the bench asks.</li>
+    </ul>
+
+    <h2 id="metrics">Metric registry</h2>
+    <table id="metric-table"><thead><tr><th>Axis</th><th>Metric</th><th>Key in <code>full_metrics.json</code></th><th>Better when</th><th>Scale</th></tr></thead><tbody></tbody></table>
+    <p>Handling metrics (hard / severe braking, MRM) are folded into Safety, matching the thesis evidence tables. Localisation and perception-count metrics are recorded per run and shown on the model page but do not enter the index, because they are internal stage signals rather than vehicle endpoints.</p>
+
+    <h2 id="uncertainty">Uncertainty</h2>
+    <p>Intervals are 95 % percentile bootstrap intervals of the whole scoring pipeline: accepted runs are resampled with replacement inside every scenario × severity cell (2 000 draws, seed 20260907) and the axis and CDB indices are recomputed each time. With n = 5 per cell the intervals are wide by design; an entry whose interval overlaps another's is not reliably ranked above it.</p>
+
+    <h2 id="boundaries">Boundaries</h2>
+    <ul>
+      <li>Results hold for the registered configuration only: this simulator, map, route, vehicle model, controller profile and intervention family. They are not a public-road safety rate.</li>
+      <li>A stage record locates where a change was first measured in the chain; it does not identify the component that caused the vehicle response. No component isolation or matched controller swap is part of the bench yet.</li>
+      <li>Severity labels are comparable only inside one intervention family. A future channel-, rate- or camera-degradation family will carry its own S0–S3 and its own index.</li>
+      <li>Zero collisions do not establish safety when braking, MRM activity, jerk or completion time change — which is why the three axes are reported separately and the absolute columns stay visible.</li>
+    </ul>
+  </article>
+</div>
+</main>
+<footer><div class="wrap"><span>Controlled Degradation Bench · score spec <span data-spec></span></span><a href="index.html">Back to the leaderboard</a></div></footer>
+<script src="data/leaderboard.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(function(){const D=window.CDB_DATA;if(!D)return;const A={safety:"Safety",comfort:"Comfort",operation:"Operation"};
+document.querySelector("#metric-table tbody").innerHTML=D.metrics.map(m=>`<tr><td>${A[m.axis]}</td><td>${m.display}${m.absolute_column?' <span class="pill muted">absolute column</span>':''}</td><td><code>${m.key}</code></td><td>${m.better_when}</td><td>${m.scale}</td></tr>`).join("");})();
+</script>
+</body>
+</html>
