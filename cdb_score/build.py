@@ -1,4 +1,4 @@
-"""Build submission packages from the formal28 evidence snapshot and the site leaderboard.json."""
+"""Build submission packages from the formal28 evidence snapshot and the docs/ leaderboard.json."""
 from __future__ import annotations
 
 import hashlib

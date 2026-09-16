@@ -29,10 +29,10 @@ def main(argv=None) -> int:
     p.add_argument("--formal28", default=str(build_mod.FORMAL28))
     p.add_argument("--entry-id", default="autoware-0.3.8_bevfusion-lidar_baseline")
 
-    p = sub.add_parser("build", help="build site/data/leaderboard.json from registry + submissions")
+    p = sub.add_parser("build", help="build docs/data/leaderboard.json from registry + submissions")
     p.add_argument("--registry", default=str(ROOT / "registry" / "models.json"))
     p.add_argument("--submissions", default=str(ROOT / "submissions"))
-    p.add_argument("--out", default=str(ROOT / "site" / "data" / "leaderboard.json"))
+    p.add_argument("--out", default=str(ROOT / "docs" / "data" / "leaderboard.json"))
     p.add_argument("--no-ci", action="store_true")
 
     p = sub.add_parser("demo-package", help="write an empty package template with the required structure")
