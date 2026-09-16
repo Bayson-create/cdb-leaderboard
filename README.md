@@ -33,6 +33,10 @@ Metric registry and scales: `cdb_score/spec.py` (Safety 7 metrics incl. handling
 
 `autoware-0.3.8_bevfusion-lidar_baseline` — built from `formal28_pattern_extraction_20260915/input_snapshot/remote_derived_evidence/<run>/metrics/full_metrics.json` for the 140 runs in `formal_140_run_selection.json` (7,418/7,418 derived files hash-verified). Pending rows in `registry/models.json` are configurations available in the reference stack that have **not** been run; they carry no numbers.
 
+## Mechanism Robustness (`docs/mechanisms.html`)
+
+A second, complementary view: the same reference stack scored on **every** registered degradation mechanism (not just range-clip), grouped into four axes — spatial coverage, point-cloud density (continuous thinning), temporal sampling (rate / message delay), object-level recognition loss — each on its own native severity ladder. Includes pooled vs cohort-comparability-controlled robustness scores, Wilson-CI breaking points, a recall/NDT-dropout mediation analysis, and a benchmark comparison against KITTI-C/nuScenes-C/Robo3D/MultiCorrupt. Built by `cdb_score/build_mechanism_robustness.py` from the `robustness_analysis_20260916` package (`ma-xie_vedgar_perception_degradation_main_analysis/results/robustness_analysis_20260916/`) into `docs/data/mechanism_robustness.json`; re-run that script and `git add`/commit to refresh it after the source package changes. No mechanism-axis score is comparable in magnitude to the CDB Index above, or to another axis — see the callout on the page itself.
+
 ## Submitting an entry
 
 See `SUBMISSION.md` (also rendered at `docs/submit.html`).

@@ -1,0 +1,1135 @@
+{
+ "schema": "cdb-mechanism-robustness/1.0",
+ "source_package": "robustness_analysis_20260916",
+ "source_readme_sha256": "5e793f8a4fb93af4b713e6b2d5402159e1b035f47b7d16e03c6d413c1ee370b1",
+ "axis_order": [
+  "spatial",
+  "density",
+  "temporal",
+  "semantic"
+ ],
+ "rs_summary": {
+  "density": {
+   "axis_label": "Point-cloud density",
+   "cohort_consistent": {
+    "safe": null,
+    "comfort": null,
+    "operation": 1.0
+   },
+   "pooled": {
+    "safe": null,
+    "comfort": null,
+    "operation": 0.956
+   }
+  },
+  "semantic": {
+   "axis_label": "Object-level recognition",
+   "cohort_consistent": {
+    "safe": 0.767,
+    "comfort": 0.537,
+    "operation": 1.0
+   },
+   "pooled": {
+    "safe": 0.724,
+    "comfort": 0.41,
+    "operation": 0.977
+   }
+  },
+  "spatial": {
+   "axis_label": "Spatial shape / coverage",
+   "cohort_consistent": {
+    "safe": 0.82,
+    "comfort": 0.87,
+    "operation": 0.903
+   },
+   "pooled": {
+    "safe": 0.704,
+    "comfort": 0.736,
+    "operation": 0.925
+   }
+  },
+  "temporal": {
+   "axis_label": "Temporal sampling / transport",
+   "cohort_consistent": {
+    "safe": 0.653,
+    "comfort": 0.432,
+    "operation": 1.0
+   },
+   "pooled": {
+    "safe": 0.729,
+    "comfort": 0.517,
+    "operation": 1.0
+   }
+  }
+ },
+ "rs_by_scenario": {
+  "density": [
+   {
+    "scenario": "curved-urban-road",
+    "scenario_label": "Urban curve",
+    "safe": null,
+    "comfort": null,
+    "operation": 1.0
+   },
+   {
+    "scenario": "lead-slow",
+    "scenario_label": "Slow lead vehicle",
+    "safe": null,
+    "comfort": null,
+    "operation": 1.0
+   },
+   {
+    "scenario": "pedestrian-emerge",
+    "scenario_label": "Occluded pedestrian",
+    "safe": null,
+    "comfort": null,
+    "operation": 1.0
+   },
+   {
+    "scenario": "red-light-violator",
+    "scenario_label": "Cross traffic at signal",
+    "safe": null,
+    "comfort": null,
+    "operation": 1.0
+   }
+  ],
+  "semantic": [
+   {
+    "scenario": "lead-slow",
+    "scenario_label": "Slow lead vehicle",
+    "safe": 0.75,
+    "comfort": 0.25,
+    "operation": 1.0
+   },
+   {
+    "scenario": "pedestrian-emerge",
+    "scenario_label": "Occluded pedestrian",
+    "safe": 0.94,
+    "comfort": 0.823,
+    "operation": 1.0
+   },
+   {
+    "scenario": "red-light-violator",
+    "scenario_label": "Cross traffic at signal",
+    "safe": 0.612,
+    "comfort": null,
+    "operation": 1.0
+   }
+  ],
+  "spatial": [
+   {
+    "scenario": "construction-obstacle",
+    "scenario_label": "Construction obstacle",
+    "safe": 0.867,
+    "comfort": 0.814,
+    "operation": 0.986
+   },
+   {
+    "scenario": "curved-urban-road",
+    "scenario_label": "Urban curve",
+    "safe": null,
+    "comfort": 0.789,
+    "operation": 1.0
+   },
+   {
+    "scenario": "dynamic-cut-in",
+    "scenario_label": "Dynamic cut-in",
+    "safe": 0.767,
+    "comfort": 0.845,
+    "operation": 1.0
+   },
+   {
+    "scenario": "lead-slow",
+    "scenario_label": "Slow lead vehicle",
+    "safe": 0.351,
+    "comfort": 0.683,
+    "operation": 0.967
+   },
+   {
+    "scenario": "lead-stopped",
+    "scenario_label": "Stopped lead vehicle",
+    "safe": 1.0,
+    "comfort": 0.997,
+    "operation": 0.994
+   },
+   {
+    "scenario": "pedestrian-emerge",
+    "scenario_label": "Occluded pedestrian",
+    "safe": 0.934,
+    "comfort": 1.0,
+    "operation": 0.645
+   },
+   {
+    "scenario": "red-light-violator",
+    "scenario_label": "Cross traffic at signal",
+    "safe": 1.0,
+    "comfort": 0.966,
+    "operation": 0.729
+   }
+  ],
+  "temporal": [
+   {
+    "scenario": "lead-slow",
+    "scenario_label": "Slow lead vehicle",
+    "safe": 1.0,
+    "comfort": 0.115,
+    "operation": 1.0
+   },
+   {
+    "scenario": "pedestrian-emerge",
+    "scenario_label": "Occluded pedestrian",
+    "safe": 0.322,
+    "comfort": 0.75,
+    "operation": 1.0
+   },
+   {
+    "scenario": "red-light-violator",
+    "scenario_label": "Cross traffic at signal",
+    "safe": 0.636,
+    "comfort": null,
+    "operation": 1.0
+   }
+  ]
+ },
+ "mechanisms": [
+  {
+   "axis": "density",
+   "axis_label": "Point-cloud density",
+   "mechanism": "distance_thinning",
+   "runs": 160,
+   "scenarios": "curved-urban-road, lead-slow, pedestrian-emerge, red-light-violator",
+   "severities": "0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, S0",
+   "metrics": 23,
+   "rs_pooled_mean": 0.92,
+   "rs_cohort_consistent_mean": 0.953
+  },
+  {
+   "axis": "density",
+   "axis_label": "Point-cloud density",
+   "mechanism": "channel",
+   "runs": 22,
+   "scenarios": "lead-stopped",
+   "severities": "S0, S1, S2, S3, S4",
+   "metrics": 70,
+   "rs_pooled_mean": null,
+   "rs_cohort_consistent_mean": null
+  },
+  {
+   "axis": "semantic",
+   "axis_label": "Object-level recognition",
+   "mechanism": "semantic_target_loss",
+   "runs": 27,
+   "scenarios": "lead-slow, pedestrian-emerge, red-light-violator",
+   "severities": "S1, S2, S3",
+   "metrics": 22,
+   "rs_pooled_mean": 0.703,
+   "rs_cohort_consistent_mean": 0.797
+  },
+  {
+   "axis": "spatial",
+   "axis_label": "Spatial shape / coverage",
+   "mechanism": "range_clip",
+   "runs": 223,
+   "scenarios": "construction-obstacle, curved-urban-road, dynamic-cut-in, lead-slow, lead-stopped, pedestrian-emerge, red-light-violator",
+   "severities": "S0, S1, S2, S3",
+   "metrics": 118,
+   "rs_pooled_mean": 0.842,
+   "rs_cohort_consistent_mean": 0.867
+  },
+  {
+   "axis": "spatial",
+   "axis_label": "Spatial shape / coverage",
+   "mechanism": "roi_cutout",
+   "runs": 27,
+   "scenarios": "lead-slow, pedestrian-emerge, red-light-violator",
+   "severities": "S1, S2, S3",
+   "metrics": 20,
+   "rs_pooled_mean": 0.64,
+   "rs_cohort_consistent_mean": null
+  },
+  {
+   "axis": "temporal",
+   "axis_label": "Temporal sampling / transport",
+   "mechanism": "perception_delay",
+   "runs": 27,
+   "scenarios": "lead-slow, pedestrian-emerge, red-light-violator",
+   "severities": "S1, S2, S3",
+   "metrics": 22,
+   "rs_pooled_mean": 0.749,
+   "rs_cohort_consistent_mean": 0.728
+  },
+  {
+   "axis": "temporal",
+   "axis_label": "Temporal sampling / transport",
+   "mechanism": "rate",
+   "runs": 16,
+   "scenarios": "lead-stopped",
+   "severities": "S1, S2, S3",
+   "metrics": 70,
+   "rs_pooled_mean": null,
+   "rs_cohort_consistent_mean": null
+  }
+ ],
+ "severity_ladder": [
+  {
+   "axis": "density",
+   "mechanism": "channel",
+   "severity": "S0",
+   "native_level": "128.0",
+   "native_unit": "laser channels",
+   "runs": 6,
+   "scenarios": "lead-stopped"
+  },
+  {
+   "axis": "density",
+   "mechanism": "channel",
+   "severity": "S1",
+   "native_level": "96.0",
+   "native_unit": "laser channels",
+   "runs": 5,
+   "scenarios": "lead-stopped"
+  },
+  {
+   "axis": "density",
+   "mechanism": "channel",
+   "severity": "S2",
+   "native_level": "64.0",
+   "native_unit": "laser channels",
+   "runs": 5,
+   "scenarios": "lead-stopped"
+  },
+  {
+   "axis": "density",
+   "mechanism": "channel",
+   "severity": "S3",
+   "native_level": "32.0",
+   "native_unit": "laser channels",
+   "runs": 5,
+   "scenarios": "lead-stopped"
+  },
+  {
+   "axis": "semantic",
+   "mechanism": "semantic_target_loss",
+   "severity": "S1",
+   "native_level": "0.25",
+   "native_unit": "suppression probability",
+   "runs": 9,
+   "scenarios": "lead-slow, pedestrian-emerge, red-light-violator"
+  },
+  {
+   "axis": "semantic",
+   "mechanism": "semantic_target_loss",
+   "severity": "S2",
+   "native_level": "0.5",
+   "native_unit": "suppression probability",
+   "runs": 9,
+   "scenarios": "lead-slow, pedestrian-emerge, red-light-violator"
+  },
+  {
+   "axis": "semantic",
+   "mechanism": "semantic_target_loss",
+   "severity": "S3",
+   "native_level": "0.75",
+   "native_unit": "suppression probability",
+   "runs": 9,
+   "scenarios": "lead-slow, pedestrian-emerge, red-light-violator"
+  },
+  {
+   "axis": "spatial",
+   "mechanism": "range_clip",
+   "severity": "S0",
+   "native_level": "",
+   "native_unit": "m",
+   "runs": 52,
+   "scenarios": "construction-obstacle, curved-urban-road, dynamic-cut-in, lead-slow, lead-stopped, pedestrian-emerge, red-light-violator"
+  },
+  {
+   "axis": "spatial",
+   "mechanism": "range_clip",
+   "severity": "S1",
+   "native_level": "75.0",
+   "native_unit": "m",
+   "runs": 56,
+   "scenarios": "construction-obstacle, curved-urban-road, dynamic-cut-in, lead-slow, lead-stopped, pedestrian-emerge, red-light-violator"
+  },
+  {
+   "axis": "spatial",
+   "mechanism": "range_clip",
+   "severity": "S2",
+   "native_level": "50.0",
+   "native_unit": "m",
+   "runs": 57,
+   "scenarios": "construction-obstacle, curved-urban-road, dynamic-cut-in, lead-slow, lead-stopped, pedestrian-emerge, red-light-violator"
+  },
+  {
+   "axis": "spatial",
+   "mechanism": "range_clip",
+   "severity": "S3",
+   "native_level": "25.0",
+   "native_unit": "m",
+   "runs": 58,
+   "scenarios": "construction-obstacle, curved-urban-road, dynamic-cut-in, lead-slow, lead-stopped, pedestrian-emerge, red-light-violator"
+  },
+  {
+   "axis": "spatial",
+   "mechanism": "roi_cutout",
+   "severity": "S1",
+   "native_level": "3.0",
+   "native_unit": "ROI radius (m)",
+   "runs": 9,
+   "scenarios": "lead-slow, pedestrian-emerge, red-light-violator"
+  },
+  {
+   "axis": "spatial",
+   "mechanism": "roi_cutout",
+   "severity": "S2",
+   "native_level": "3.0",
+   "native_unit": "ROI radius (m)",
+   "runs": 9,
+   "scenarios": "lead-slow, pedestrian-emerge, red-light-violator"
+  },
+  {
+   "axis": "spatial",
+   "mechanism": "roi_cutout",
+   "severity": "S3",
+   "native_level": "3.0",
+   "native_unit": "ROI radius (m)",
+   "runs": 9,
+   "scenarios": "lead-slow, pedestrian-emerge, red-light-violator"
+  },
+  {
+   "axis": "temporal",
+   "mechanism": "perception_delay",
+   "severity": "S1",
+   "native_level": "100.0",
+   "native_unit": "ms",
+   "runs": 9,
+   "scenarios": "lead-slow, pedestrian-emerge, red-light-violator"
+  },
+  {
+   "axis": "temporal",
+   "mechanism": "perception_delay",
+   "severity": "S2",
+   "native_level": "300.0",
+   "native_unit": "ms",
+   "runs": 9,
+   "scenarios": "lead-slow, pedestrian-emerge, red-light-violator"
+  },
+  {
+   "axis": "temporal",
+   "mechanism": "perception_delay",
+   "severity": "S3",
+   "native_level": "500.0",
+   "native_unit": "ms",
+   "runs": 9,
+   "scenarios": "lead-slow, pedestrian-emerge, red-light-violator"
+  },
+  {
+   "axis": "temporal",
+   "mechanism": "rate",
+   "severity": "S1",
+   "native_level": "5.0",
+   "native_unit": "Hz",
+   "runs": 5,
+   "scenarios": "lead-stopped"
+  },
+  {
+   "axis": "temporal",
+   "mechanism": "rate",
+   "severity": "S2",
+   "native_level": "2.5",
+   "native_unit": "Hz",
+   "runs": 6,
+   "scenarios": "lead-stopped"
+  },
+  {
+   "axis": "temporal",
+   "mechanism": "rate",
+   "severity": "S3",
+   "native_level": "1.0",
+   "native_unit": "Hz",
+   "runs": 5,
+   "scenarios": "lead-stopped"
+  }
+ ],
+ "breaking_points": [
+  {
+   "axis": "density",
+   "scenario": "curved-urban-road",
+   "mechanism": "distance_thinning",
+   "metric_class": "",
+   "wilson_high": 0.4345,
+   "continuous_breaking_point": null,
+   "first_level_below_0.8": null,
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "density",
+   "scenario": "lead-slow",
+   "mechanism": "distance_thinning",
+   "metric_class": "localisation",
+   "wilson_high": 0.4345,
+   "continuous_breaking_point": 0.841,
+   "first_level_below_0.8": "1.0",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "density",
+   "scenario": "lead-stopped",
+   "mechanism": "channel",
+   "metric_class": "localisation",
+   "wilson_high": 0.4345,
+   "continuous_breaking_point": 0.2597,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "density",
+   "scenario": "pedestrian-emerge",
+   "mechanism": "distance_thinning",
+   "metric_class": "localisation",
+   "wilson_high": 0.4345,
+   "continuous_breaking_point": 3.4007,
+   "first_level_below_0.8": "0.7",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "density",
+   "scenario": "red-light-violator",
+   "mechanism": "distance_thinning",
+   "metric_class": "localisation",
+   "wilson_high": 0.4345,
+   "continuous_breaking_point": 0.885,
+   "first_level_below_0.8": "1.0",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "density",
+   "scenario": "red-light-violator",
+   "mechanism": "distance_thinning",
+   "metric_class": "operation",
+   "wilson_high": 0.4345,
+   "continuous_breaking_point": 1.7555,
+   "first_level_below_0.8": "0.9",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "semantic",
+   "scenario": "lead-slow",
+   "mechanism": "semantic_target_loss",
+   "metric_class": "comfort+handling",
+   "wilson_high": 0.5615,
+   "continuous_breaking_point": 1.0,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "semantic",
+   "scenario": "lead-slow",
+   "mechanism": "semantic_target_loss",
+   "metric_class": "safe",
+   "wilson_high": 0.5615,
+   "continuous_breaking_point": 1.2,
+   "first_level_below_0.8": "S2",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "semantic",
+   "scenario": "pedestrian-emerge",
+   "mechanism": "semantic_target_loss",
+   "metric_class": "comfort+handling",
+   "wilson_high": 0.5615,
+   "continuous_breaking_point": 1.0,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": true,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "semantic",
+   "scenario": "red-light-violator",
+   "mechanism": "semantic_target_loss",
+   "metric_class": "comfort+handling",
+   "wilson_high": 0.5615,
+   "continuous_breaking_point": 1.0,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "semantic",
+   "scenario": "red-light-violator",
+   "mechanism": "semantic_target_loss",
+   "metric_class": "safe",
+   "wilson_high": 0.5615,
+   "continuous_breaking_point": 1.0,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "spatial",
+   "scenario": "construction-obstacle",
+   "mechanism": "range_clip",
+   "metric_class": "comfort+handling",
+   "wilson_high": 0.4345,
+   "continuous_breaking_point": 0.4293,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "spatial",
+   "scenario": "construction-obstacle",
+   "mechanism": "range_clip",
+   "metric_class": "localisation",
+   "wilson_high": 0.4345,
+   "continuous_breaking_point": 0.3627,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "spatial",
+   "scenario": "construction-obstacle",
+   "mechanism": "range_clip",
+   "metric_class": "safe",
+   "wilson_high": 0.4345,
+   "continuous_breaking_point": 1.5039,
+   "first_level_below_0.8": "S2",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "spatial",
+   "scenario": "curved-urban-road",
+   "mechanism": "range_clip",
+   "metric_class": "comfort+handling",
+   "wilson_high": 0.4345,
+   "continuous_breaking_point": 0.5381,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "spatial",
+   "scenario": "dynamic-cut-in",
+   "mechanism": "range_clip",
+   "metric_class": "comfort+handling",
+   "wilson_high": 0.6245,
+   "continuous_breaking_point": 1.6043,
+   "first_level_below_0.8": "S2",
+   "absolute_breaking_point": true,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "spatial",
+   "scenario": "dynamic-cut-in",
+   "mechanism": "range_clip",
+   "metric_class": "safe",
+   "wilson_high": 0.6245,
+   "continuous_breaking_point": 0.5776,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": true,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "spatial",
+   "scenario": "lead-slow",
+   "mechanism": "range_clip",
+   "metric_class": "comfort+handling",
+   "wilson_high": 0.5474,
+   "continuous_breaking_point": 2.3243,
+   "first_level_below_0.8": "S3",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "spatial",
+   "scenario": "lead-slow",
+   "mechanism": "range_clip",
+   "metric_class": "localisation",
+   "wilson_high": 0.5474,
+   "continuous_breaking_point": 0.2297,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "spatial",
+   "scenario": "lead-slow",
+   "mechanism": "range_clip",
+   "metric_class": "operation",
+   "wilson_high": 0.5474,
+   "continuous_breaking_point": 0.8981,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "spatial",
+   "scenario": "lead-slow",
+   "mechanism": "range_clip",
+   "metric_class": "perception",
+   "wilson_high": 0.5474,
+   "continuous_breaking_point": 1.2765,
+   "first_level_below_0.8": "S2",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "spatial",
+   "scenario": "lead-slow",
+   "mechanism": "roi_cutout",
+   "metric_class": "comfort+handling",
+   "wilson_high": 0.5615,
+   "continuous_breaking_point": 1.0,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "spatial",
+   "scenario": "lead-slow",
+   "mechanism": "roi_cutout",
+   "metric_class": "operation",
+   "wilson_high": 0.5615,
+   "continuous_breaking_point": 1.0,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "spatial",
+   "scenario": "lead-slow",
+   "mechanism": "roi_cutout",
+   "metric_class": "safe",
+   "wilson_high": 0.5615,
+   "continuous_breaking_point": 1.0,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "spatial",
+   "scenario": "lead-stopped",
+   "mechanism": "range_clip",
+   "metric_class": "comfort+handling",
+   "wilson_high": 0.6873,
+   "continuous_breaking_point": 0.3048,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "spatial",
+   "scenario": "lead-stopped",
+   "mechanism": "range_clip",
+   "metric_class": "safe",
+   "wilson_high": 0.6873,
+   "continuous_breaking_point": 0.2162,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "spatial",
+   "scenario": "pedestrian-emerge",
+   "mechanism": "range_clip",
+   "metric_class": "operation",
+   "wilson_high": 0.8794,
+   "continuous_breaking_point": 1.943,
+   "first_level_below_0.8": "S2",
+   "absolute_breaking_point": true,
+   "baseline_breaking_point": true
+  },
+  {
+   "axis": "spatial",
+   "scenario": "pedestrian-emerge",
+   "mechanism": "range_clip",
+   "metric_class": "perception",
+   "wilson_high": 0.8794,
+   "continuous_breaking_point": 0.9315,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": true,
+   "baseline_breaking_point": true
+  },
+  {
+   "axis": "spatial",
+   "scenario": "pedestrian-emerge",
+   "mechanism": "roi_cutout",
+   "metric_class": "comfort+handling",
+   "wilson_high": 0.5615,
+   "continuous_breaking_point": 1.0,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": true,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "spatial",
+   "scenario": "pedestrian-emerge",
+   "mechanism": "roi_cutout",
+   "metric_class": "safe",
+   "wilson_high": 0.5615,
+   "continuous_breaking_point": 2.5731,
+   "first_level_below_0.8": "S3",
+   "absolute_breaking_point": true,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "spatial",
+   "scenario": "red-light-violator",
+   "mechanism": "range_clip",
+   "metric_class": "comfort+handling",
+   "wilson_high": 0.2281,
+   "continuous_breaking_point": 2.5351,
+   "first_level_below_0.8": "S3",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "spatial",
+   "scenario": "red-light-violator",
+   "mechanism": "range_clip",
+   "metric_class": "localisation",
+   "wilson_high": 0.2281,
+   "continuous_breaking_point": 0.6319,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "spatial",
+   "scenario": "red-light-violator",
+   "mechanism": "roi_cutout",
+   "metric_class": "comfort+handling",
+   "wilson_high": 0.5615,
+   "continuous_breaking_point": 1.0,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "spatial",
+   "scenario": "red-light-violator",
+   "mechanism": "roi_cutout",
+   "metric_class": "safe",
+   "wilson_high": 0.5615,
+   "continuous_breaking_point": 1.0,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "temporal",
+   "scenario": "lead-slow",
+   "mechanism": "perception_delay",
+   "metric_class": "comfort+handling",
+   "wilson_high": 0.5615,
+   "continuous_breaking_point": 2.0803,
+   "first_level_below_0.8": "S3",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "temporal",
+   "scenario": "lead-slow",
+   "mechanism": "perception_delay",
+   "metric_class": "safe",
+   "wilson_high": 0.5615,
+   "continuous_breaking_point": 1.7452,
+   "first_level_below_0.8": "S2",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "temporal",
+   "scenario": "lead-stopped",
+   "mechanism": "rate",
+   "metric_class": "localisation",
+   "wilson_high": 0.4345,
+   "continuous_breaking_point": 1.0,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "temporal",
+   "scenario": "lead-stopped",
+   "mechanism": "rate",
+   "metric_class": "operation",
+   "wilson_high": 0.4345,
+   "continuous_breaking_point": 1.0,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "temporal",
+   "scenario": "lead-stopped",
+   "mechanism": "rate",
+   "metric_class": "safe",
+   "wilson_high": 0.4345,
+   "continuous_breaking_point": 1.0,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "temporal",
+   "scenario": "pedestrian-emerge",
+   "mechanism": "perception_delay",
+   "metric_class": "comfort+handling",
+   "wilson_high": 0.5615,
+   "continuous_breaking_point": 1.0,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": true,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "temporal",
+   "scenario": "pedestrian-emerge",
+   "mechanism": "perception_delay",
+   "metric_class": "safe",
+   "wilson_high": 0.5615,
+   "continuous_breaking_point": 1.0,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": true,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "temporal",
+   "scenario": "red-light-violator",
+   "mechanism": "perception_delay",
+   "metric_class": "comfort+handling",
+   "wilson_high": 0.5615,
+   "continuous_breaking_point": 1.0,
+   "first_level_below_0.8": "S1",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  },
+  {
+   "axis": "temporal",
+   "scenario": "red-light-violator",
+   "mechanism": "perception_delay",
+   "metric_class": "safe",
+   "wilson_high": 0.5615,
+   "continuous_breaking_point": 2.6469,
+   "first_level_below_0.8": "S3",
+   "absolute_breaking_point": false,
+   "baseline_breaking_point": false
+  }
+ ],
+ "mediation": [
+  {
+   "mediator": "input.output_input_ratio",
+   "axis": "density",
+   "cells": 36,
+   "spearman_rho": -0.2318,
+   "p_value": 0.1737,
+   "p_bh": 0.2606
+  },
+  {
+   "mediator": "input.output_input_ratio",
+   "axis": "spatial",
+   "cells": 9,
+   "spearman_rho": -0.1833,
+   "p_value": 0.6368,
+   "p_bh": 0.7164
+  },
+  {
+   "mediator": "localisation.error_m",
+   "axis": "density",
+   "cells": 36,
+   "spearman_rho": 0.2565,
+   "p_value": 0.131,
+   "p_bh": 0.2357
+  },
+  {
+   "mediator": "localisation.error_m",
+   "axis": "spatial",
+   "cells": 24,
+   "spearman_rho": 0.067,
+   "p_value": 0.7556,
+   "p_bh": 0.7556
+  },
+  {
+   "mediator": "localisation.ndt_dropout_s",
+   "axis": "density",
+   "cells": 40,
+   "spearman_rho": -0.2664,
+   "p_value": 0.0966,
+   "p_bh": 0.2357
+  },
+  {
+   "mediator": "localisation.ndt_dropout_s",
+   "axis": "semantic",
+   "cells": 9,
+   "spearman_rho": 0.4108,
+   "p_value": 0.2721,
+   "p_bh": 0.3498
+  },
+  {
+   "mediator": "localisation.ndt_dropout_s",
+   "axis": "spatial",
+   "cells": 28,
+   "spearman_rho": 0.6648,
+   "p_value": 0.0001,
+   "p_bh": 0.001
+  },
+  {
+   "mediator": "localisation.ndt_dropout_s",
+   "axis": "temporal",
+   "cells": 12,
+   "spearman_rho": 0.7343,
+   "p_value": 0.0065,
+   "p_bh": 0.0294
+  },
+  {
+   "mediator": "perception.recall",
+   "axis": "spatial",
+   "cells": 12,
+   "spearman_rho": 0.4894,
+   "p_value": 0.1064,
+   "p_bh": 0.2357
+  }
+ ],
+ "benchmark_comparison": [
+  {
+   "dimension": "Evaluation level",
+   "perception_level": "Perception / prediction (open loop)",
+   "this_benchmark": "Vehicle behaviour, closed loop (Autoware + CARLA)"
+  },
+  {
+   "dimension": "Behaviour metric families",
+   "perception_level": "Detection or prediction accuracy only",
+   "this_benchmark": "Safe, comfort & handling, operation, with chain metrics for attribution"
+  },
+  {
+   "dimension": "Scenario stratification",
+   "perception_level": "Usually not stratified",
+   "this_benchmark": "Seven risk-motivated scenarios, never pooled across scenario"
+  },
+  {
+   "dimension": "Severity design",
+   "perception_level": "Often single or few corruption levels",
+   "this_benchmark": "Mechanism-local native ladders (S0-S3, 4-8 levels) plus a continuous thinning ladder"
+  },
+  {
+   "dimension": "Temporal / semantic degradations",
+   "perception_level": "Usually absent",
+   "this_benchmark": "Temporal sampling (rate, perception delay) and object-level recognition loss included"
+  },
+  {
+   "dimension": "Module attribution",
+   "perception_level": "Not applicable at perception level",
+   "this_benchmark": "Localisation, perception and timing chains measured per run; Oracle substitution planned"
+  },
+  {
+   "dimension": "Statistical treatment",
+   "perception_level": "Often single run",
+   "this_benchmark": "Per-cell n reported (2-17), bootstrap CI, Wilson CI, Holm/BH correction, JT trend test, ART interaction"
+  },
+  {
+   "dimension": "Reproducibility",
+   "perception_level": "Varies",
+   "this_benchmark": "Hash-manifested local rebuild, frozen confidence rule, determinism test"
+  },
+  {
+   "dimension": "Reference benchmarks",
+   "perception_level": "KITTI-C, nuScenes-C, Robo3D, MultiCorrupt",
+   "this_benchmark": "This package (Controlled Degradation Bench, vEDGAR stack)"
+  }
+ ],
+ "headline_reconciliation": [
+  {
+   "claim": "lead-slow travel_time_s S0->S3",
+   "thesis_value": "127.30 -> 131.44",
+   "recomputed_value": "[127.3, 129.26, 130.03, 131.44]",
+   "verdict": "reproduced",
+   "note": "exact match from full_metrics.json route_metrics"
+  },
+  {
+   "claim": "pedestrian travel_time_s S0->S3",
+   "thesis_value": "125.57 -> 129.96",
+   "recomputed_value": "[125.57, 127.77, 128.9, 129.96]",
+   "verdict": "reproduced",
+   "note": "same source as above"
+  },
+  {
+   "claim": "lead-slow recall S0->S3",
+   "thesis_value": "0.632 -> 0.359 -> 0.351 -> 0.336",
+   "recomputed_value": "[0.997, 1.0, 0.982, 0.971]",
+   "verdict": "see note",
+   "note": "recomputed from the detector-GT layer"
+  },
+  {
+   "claim": "red-light recall reversal (peak S1-S2)",
+   "thesis_value": "0.046 -> 0.384 -> 0.409 -> 0.085",
+   "recomputed_value": "[0.688, 0.515, 0.864, 0.93]",
+   "verdict": "no reversal found",
+   "note": "recomputed from the detector-GT layer"
+  },
+  {
+   "claim": "active-fault MRM events (lead-slow, delay)",
+   "thesis_value": "4 -> 27 across 100/300/500 ms",
+   "recomputed_value": "{'S1': 4.0, 'S2': 2.67, 'S3': 23.67}",
+   "verdict": "see note",
+   "note": "recomputed from fresh_fault_behavior"
+  },
+  {
+   "claim": "route completion sits at the ceiling",
+   "thesis_value": "~0.996 in every cell",
+   "recomputed_value": "range across severities = 0.00046",
+   "verdict": "reproduced",
+   "note": "a 0.5% band; no severity trend"
+  },
+  {
+   "claim": "zero collisions in the 60-run formal matrix",
+   "thesis_value": "0 in all cells",
+   "recomputed_value": "total collisions = 0",
+   "verdict": "reproduced",
+   "note": "sum over every formal-matrix collision_count row"
+  },
+  {
+   "claim": "red-light travel-time breakpoint at retained ratio 0.4567",
+   "thesis_value": "slope -58.07 below / +12.21 above",
+   "recomputed_value": "n=40, Spearman rho=-0.250, p=0.119",
+   "verdict": "cannot test (locally partial)",
+   "note": "the local continuous-dose slice cannot reproduce the segmentation"
+  },
+  {
+   "claim": "lead-slow travel_time_s S0->S3",
+   "thesis_value": "see frozen row above",
+   "recomputed_value": "[126.15, 34.5, 34.98, 35.33]",
+   "verdict": "package re-derivation",
+   "note": "median over spatial-axis runs per severity in the rebuilt table"
+  },
+  {
+   "claim": "pedestrian travel_time_s S0->S3",
+   "thesis_value": "see frozen row above",
+   "recomputed_value": "[124.3, 27.85, 28.1, 28.45]",
+   "verdict": "package re-derivation",
+   "note": "median over spatial-axis runs per severity in the rebuilt table"
+  }
+ ],
+ "limitations": [
+  "Severity is mechanism-local: three declared levels per mechanism (plus one continuous 8-level thinning ladder); the interpolated crossing is an estimate and cross-mechanism magnitude statements are not supported.",
+  "Repeats are unequal: as few as n=3 in the semantic and delay cohorts; binary endpoints have a resolution of 20% or coarser; the ART interaction test is under-powered (no term reaches significance).",
+  "Cohort comparability: route length, actor set-up and measurement windows differ between campaigns; pooled and cohort-consistent scores agree on which cells are fragile but not on absolute magnitude.",
+  "The channel x lead-stopped ladder has no comparable nominal reference and is excluded from scoring.",
+  "No noise/shape injector exists in the stack; the 'shape' axis in the original plan is not implemented and is substituted here by spatial coverage.",
+  "Mediator coverage: perception recall exists for three scenarios, localisation error for four; the responsibility split is a readiness statement until the Oracle runs (see run_matrix.csv / oracle_matrix.csv) are executed.",
+  "213 of 508 analysis-base runs have a local full_metrics.json; the rest come from cohort-level per-run exports, hashed and inventoried but one step further from the raw bag.",
+  "Bounded to this simulator, this Autoware configuration (NDT localisation, CenterPoint/BEVFusion detection, camera for traffic lights) and the Town10 route family; nothing here transfers automatically to another stack or to road vehicles.",
+  "construction-obstacle and dynamic-cut-in have 20 runs each, no accepted formal gate, and are treated as context-commissioning evidence.",
+  "Route completion at the ceiling, zero-variance baselines and non-monotone metrics (NDT score, yaw rate) are reported as measured changes, never as safety statements."
+ ]
+}

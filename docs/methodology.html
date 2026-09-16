@@ -11,7 +11,7 @@
 <body>
 <header class="topbar"><div class="wrap">
   <a class="logo" href="index.html"><svg class="mark" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 13 L7 4 L11 11 L16 5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Controlled Degradation Bench</a>
-  <nav class="nav"><a class="btn ghost" href="index.html#leaderboard">← Leaderboard</a><a class="btn accent" href="submit.html">Submit results</a></nav>
+  <nav class="nav"><a class="btn ghost" href="index.html#leaderboard">← Leaderboard</a><a class="btn ghost" href="mechanisms.html">Mechanisms</a><a class="btn accent" href="submit.html">Submit results</a></nav>
 </div></header>
 
 <main class="wrap">
@@ -71,6 +71,7 @@ CDB    = (Safety + Comfort + Operation) / 3</pre>
       <li>Severity labels are comparable only inside one intervention family. A future channel-, rate- or camera-degradation family will carry its own S0–S3 and its own index.</li>
       <li>Zero collisions do not establish safety when braking, MRM activity, jerk or completion time change — which is why the three axes are reported separately and the absolute columns stay visible.</li>
     </ul>
+    <p style="margin-top:14px">The severity-family boundary above is exactly why every other registered mechanism (channel, rate, perception delay, semantic target loss, distance thinning, ROI cutout) is reported on its own axis rather than folded into this index — see <a href="mechanisms.html">Mechanism Robustness</a> for that four-axis (spatial / density / temporal / semantic) view, its breaking points, and a benchmark comparison table.</p>
   </article>
 </div>
 </main>
