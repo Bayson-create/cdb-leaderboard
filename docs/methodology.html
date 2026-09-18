@@ -49,7 +49,7 @@ w_s    = max(0, sign_m · (d_s − b))                  (worsening; sign = +1 wh
 r_qms  = 1 − clip(w_s / scale_m(b), 0, 1)            (retention, 0…1)
 r_qm   = (r_S1 + r_S2 + 2·r_S3) / 4                  (S3 counts double)
 Axis_a = 100 · mean over q and m∈a of r_qm
-CDB    = (Safety + Comfort + Operation) / 3</pre>
+CDB    = (Safety + Comfort &amp; handling + Operation) / 3</pre>
     <ul>
       <li><strong>Improvement is not rewarded.</strong> A metric that gets better under degradation (for example a faster completion time in the cut-in task) retains 1.0, no more. The index measures loss, not gain.</li>
       <li><strong>Scale.</strong> Each metric has a registered normalising scale so that S0 values near zero cannot blow up the ratio: mostly the S0 value with a floor, 25 % of the S0 completion time, and exactly one event for collisions and blocked events (any new collision at a severity zeroes that severity's retention).</li>
@@ -59,7 +59,7 @@ CDB    = (Safety + Comfort + Operation) / 3</pre>
 
     <h2 id="metrics">Metric registry</h2>
     <table id="metric-table"><thead><tr><th>Axis</th><th>Metric</th><th>Key in <code>full_metrics.json</code></th><th>Better when</th><th>Scale</th></tr></thead><tbody></tbody></table>
-    <p>Handling metrics (hard / severe braking, MRM) are folded into Safety, matching the thesis evidence tables. Localisation and perception-count metrics are recorded per run and shown on the model page but do not enter the index, because they are internal stage signals rather than vehicle endpoints.</p>
+    <p>Handling metrics (hard / severe braking, MRM) are folded into <strong>Comfort &amp; handling</strong>, matching the thesis family definition (thesis §3.6.2). The v1.1 spec therefore scores Safety over four vehicle-outcome endpoints, Comfort &amp; handling over nine dynamics/handling endpoints, and Operation over four task endpoints. Localisation and perception-count metrics are recorded per run and shown on the model page but do not enter the index, because they are internal stage signals rather than vehicle endpoints.</p>
 
     <h2 id="uncertainty">Uncertainty</h2>
     <p>Intervals are 95 % percentile bootstrap intervals of the whole scoring pipeline: accepted runs are resampled with replacement inside every scenario × severity cell (2 000 draws, seed 20260907) and the axis and CDB indices are recomputed each time. With n = 5 per cell the intervals are wide by design; an entry whose interval overlaps another's is not reliably ranked above it.</p>
@@ -79,7 +79,7 @@ CDB    = (Safety + Comfort + Operation) / 3</pre>
 <script src="data/leaderboard.js"></script>
 <script src="assets/app.js"></script>
 <script>
-(function(){const D=window.CDB_DATA;if(!D)return;const A={safety:"Safety",comfort:"Comfort",operation:"Operation"};
+(function(){const D=window.CDB_DATA;if(!D)return;const A={safety:"Safety",comfort:"Comfort & handling",operation:"Operation"};
 document.querySelector("#metric-table tbody").innerHTML=D.metrics.map(m=>`<tr><td>${A[m.axis]}</td><td>${m.display}${m.absolute_column?' <span class="pill muted">absolute column</span>':''}</td><td><code>${m.key}</code></td><td>${m.better_when}</td><td>${m.scale}</td></tr>`).join("");})();
 </script>
 </body>

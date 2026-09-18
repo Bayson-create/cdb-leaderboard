@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Controlled Degradation Bench</title>
-<meta name="description" content="Independent closed-loop evaluation of automated-driving software stacks under registered LiDAR degradation: Safety, Comfort and Operation robustness indices.">
+<meta name="description" content="Independent closed-loop evaluation of automated-driving software stacks under registered LiDAR degradation: Safety, Comfort &amp; handling and Operation robustness indices.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif&display=swap">
 <link rel="stylesheet" href="assets/styles.css">
@@ -25,7 +25,7 @@
   <section class="hero">
     <div>
       <h1>Independent<br>closed-loop evaluation<br>of AD stacks</h1>
-      <p class="lede">How much Safety, Comfort and Operation does an automated-driving software stack keep when its LiDAR information is degraded in a controlled way? The bench drives every stack through the same seven traffic tasks, four registered severities and five repeats inside a CARLA · vEDGAR · Autoware loop, and scores what the vehicle actually did.
+      <p class="lede">How much Safety, Comfort &amp; handling and Operation does an automated-driving software stack keep when its LiDAR information is degraded in a controlled way? The bench drives every stack through the same seven traffic tasks, four registered severities and five repeats inside a CARLA · vEDGAR · Autoware loop, and scores what the vehicle actually did.
         <span class="note">Scores are <strong>degradation-robustness indices</strong>: S0-normalised retention of each endpoint, not absolute performance. One configuration, one map, one controller profile per entry. <a href="methodology.html">Read the methodology →</a></span></p>
     </div>
     <aside class="updates" id="updates" aria-label="Updates"></aside>
@@ -45,8 +45,8 @@
       <section class="section" id="highlights">
         <div class="section-head"><span class="eyebrow">Highlights</span><span class="sub">Robustness index 0–100 · higher is better · 95 % run-level bootstrap interval in the table</span></div>
         <div class="cards">
-          <div class="card"><div class="card-title"><h3><span class="swatch" style="background:var(--safety)"></span>Safety</h3><span class="pill accent">Updated</span></div><p class="desc">Collisions, minimum TTC, TTC warnings, lane invasions, MRM events, hard and severe braking — retained at S1–S3 relative to S0.</p><div class="chart" id="chart-safety"></div><div class="foot"><span>7 metrics × 7 scenarios</span><span>S3 weighted ×2</span></div></div>
-          <div class="card"><div class="card-title"><h3><span class="swatch" style="background:var(--comfort)"></span>Comfort</h3></div><p class="desc">Longitudinal jerk, jerk magnitude, yaw acceleration, yaw rate, lateral acceleration and peak deceleration — dynamic burden the passenger feels.</p><div class="chart" id="chart-comfort"></div><div class="foot"><span>6 metrics × 7 scenarios</span><span>S3 weighted ×2</span></div></div>
+          <div class="card"><div class="card-title"><h3><span class="swatch" style="background:var(--safety)"></span>Safety</h3><span class="pill accent">Updated</span></div><p class="desc">Collisions, minimum TTC, TTC warnings and lane invasions — retained at S1–S3 relative to S0.</p><div class="chart" id="chart-safety"></div><div class="foot"><span>4 metrics × 7 scenarios</span><span>S3 weighted ×2</span></div></div>
+          <div class="card"><div class="card-title"><h3><span class="swatch" style="background:var(--comfort)"></span>Comfort &amp; handling</h3></div><p class="desc">Longitudinal jerk, jerk magnitude, yaw acceleration, yaw rate, lateral acceleration, peak deceleration, MRM events and hard / severe braking — dynamic burden and emergency handling.</p><div class="chart" id="chart-comfort"></div><div class="foot"><span>9 metrics × 7 scenarios</span><span>S3 weighted ×2</span></div></div>
           <div class="card"><div class="card-title"><h3><span class="swatch" style="background:var(--operation)"></span>Operation</h3></div><p class="desc">Completion time, no-progress duration, blocked events and route completion — the operational cost of finishing the task.</p><div class="chart" id="chart-operation"></div><div class="foot"><span>4 metrics × 7 scenarios</span><span>S3 weighted ×2</span></div></div>
         </div>
       </section>
@@ -75,7 +75,7 @@
                 <th>Model <span class="u">creator · detector · fusion · controller</span></th>
                 <th class="sortable grp-start sorted-desc" data-sort="cdb_index">CDB Index <span class="u">equal-weight mean</span></th>
                 <th class="sortable" data-sort="safety">Safety <span class="u">0–100</span></th>
-                <th class="sortable" data-sort="comfort">Comfort <span class="u">0–100</span></th>
+                <th class="sortable" data-sort="comfort">Comfort &amp; handling <span class="u">0–100</span></th>
                 <th class="sortable" data-sort="operation">Operation <span class="u">0–100</span></th>
                 <th class="sortable grp-start col-abs" data-sort="abs_collisions">Collisions <span class="u">per run</span></th>
                 <th class="sortable col-abs" data-sort="abs_ttc">Min TTC <span class="u">s</span></th>

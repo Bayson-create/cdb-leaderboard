@@ -1,4 +1,8 @@
+import json
+import tempfile
 import unittest
+from pathlib import Path
+from cdb_score import build as build_mod
 from cdb_score import spec
 from cdb_score.score import retention, score_runs, summarize
 from cdb_score.validate import validate_package
@@ -85,6 +89,58 @@ class MatrixTests(unittest.TestCase):
         lo, hi = s["ci95"]["cdb_index"]
         self.assertLessEqual(lo, s["scores"]["cdb_index"])
         self.assertGreaterEqual(hi, s["scores"]["cdb_index"])
+
+
+class V11SpecTests(unittest.TestCase):
+    """cdb-score/1.1: handling metrics belong to the Comfort & handling axis."""
+
+    HANDLING = [
+        "safety.mrm_event_count",
+        "event_rates.hard_braking.per_km",
+        "event_rates.severe_braking.per_km",
+    ]
+
+    def test_spec_version_and_axis_counts(self):
+        self.assertEqual(spec.SPEC_VERSION, "cdb-score/1.1")
+        self.assertEqual(len(spec.METRICS_BY_AXIS["safety"]), 4)
+        self.assertEqual(len(spec.METRICS_BY_AXIS["comfort"]), 9)
+        self.assertEqual(len(spec.METRICS_BY_AXIS["operation"]), 4)
+        for key in self.HANDLING:
+            self.assertEqual(spec.METRIC_BY_KEY[key].axis, "comfort")
+
+    def test_reference_entry_v11_scores_and_intervals(self):
+        pkg_path = (Path(__file__).resolve().parents[1] /
+                    "submissions" / "autoware-0.3.8_bevfusion-lidar_baseline" / "package.json")
+        if not pkg_path.exists():
+            self.skipTest("reference submission package not present")
+        pkg = json.loads(pkg_path.read_text())
+        s = summarize(pkg["runs"], with_ci=True)
+        self.assertAlmostEqual(s["scores"]["cdb_index"], 88.9301, places=2)
+        self.assertAlmostEqual(s["scores"]["safety"], 89.6731, places=2)
+        self.assertAlmostEqual(s["scores"]["comfort"], 78.7638, places=2)
+        self.assertAlmostEqual(s["scores"]["operation"], 98.3533, places=2)
+        ci = s["ci95"]
+        self.assertAlmostEqual(ci["cdb_index"][0], 84.5296, places=2)
+        self.assertAlmostEqual(ci["cdb_index"][1], 91.7467, places=2)
+        self.assertAlmostEqual(ci["safety"][0], 83.0857, places=2)
+        self.assertAlmostEqual(ci["safety"][1], 95.7481, places=2)
+        self.assertAlmostEqual(ci["comfort"][0], 70.7257, places=2)
+        self.assertAlmostEqual(ci["comfort"][1], 84.4369, places=2)
+        self.assertAlmostEqual(ci["operation"][0], 95.6216, places=2)
+        self.assertAlmostEqual(ci["operation"][1], 98.6547, places=2)
+
+    def test_build_is_deterministic(self):
+        registry = Path(__file__).resolve().parents[1] / "registry" / "models.json"
+        submissions = Path(__file__).resolve().parents[1] / "submissions"
+        with tempfile.TemporaryDirectory() as td:
+            a = Path(td) / "a.json"
+            b = Path(td) / "b.json"
+            la = build_mod.build_leaderboard(registry, submissions, a, with_ci=True)
+            lb = build_mod.build_leaderboard(registry, submissions, b, with_ci=True)
+        self.assertEqual(la["spec_version"], "cdb-score/1.1")
+        self.assertEqual(json.dumps(la["entries"], sort_keys=True), json.dumps(lb["entries"], sort_keys=True))
+        self.assertEqual(la["metrics"], lb["metrics"])
+        self.assertEqual(la["matrix"], lb["matrix"])
 
 
 if __name__ == "__main__":

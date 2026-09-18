@@ -62,6 +62,7 @@ python3 scripts/run_supplementary_campaign.py \
     <p><code>python -m cdb_score demo-package template.json</code> writes an empty template; <code>cdb_score/spec.py::PACKAGE_METRIC_KEYS</code> lists the keys to copy. Scenario slugs: <code>lead-stopped</code>, <code>lead-slow</code>, <code>curved-urban-road</code>, <code>pedestrian-emerge</code>, <code>red-light-violator</code>, <code>construction-obstacle</code>, <code>dynamic-cut-in</code>.</p>
 
     <h2 id="s4">4 · Validate &amp; score locally</h2>
+    <p>The current score specification is <code>cdb-score/1.1</code>: Safety 4 metrics, Comfort &amp; handling 9 metrics (including MRM / hard / severe braking), Operation 4 metrics.</p>
 <pre>python -m cdb_score validate submissions/&lt;entry-id&gt;      # PASS / FAIL with per-cell counts
 python -m cdb_score score    submissions/&lt;entry-id&gt;      # indices + 95 % intervals + per-scenario axes</pre>
     <p>The validator output you will see for a complete matrix:</p>

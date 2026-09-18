@@ -1,6 +1,6 @@
 # Controlled Degradation Bench — Leaderboard
 
-Static leaderboard + scoring CLI for the **Controlled Degradation Bench (CDB)**: closed-loop evaluation of automated-driving software stacks under a registered LiDAR degradation (CARLA 0.9.16 · vEDGAR 1.0.3 · Autoware). Every entry is driven through the same 7 scenarios × S0–S3 × 5 accepted repeats (140 runs) and scored on three **degradation-robustness indices** — Safety, Comfort, Operation — plus their equal-weight mean, the CDB Index.
+Static leaderboard + scoring CLI for the **Controlled Degradation Bench (CDB)**: closed-loop evaluation of automated-driving software stacks under a registered LiDAR degradation (CARLA 0.9.16 · vEDGAR 1.0.3 · Autoware). Every entry is driven through the same 7 scenarios × S0–S3 × 5 accepted repeats (140 runs) and scored on three **degradation-robustness indices** — Safety, Comfort & handling, Operation — plus their equal-weight mean, the CDB Index.
 
 Design language after [artificialanalysis.ai](https://artificialanalysis.ai). No build step for the site; no third-party Python dependencies.
 
@@ -23,15 +23,15 @@ python3 -m cdb_score build                                    # -> docs/data/lea
 cd docs && python3 -m http.server 8790                        # http://127.0.0.1:8790
 ```
 
-## Score (spec `cdb-score/1.0`)
+## Score (spec `cdb-score/1.1`)
 
-For scenario *q*, metric *m* on axis *a*, severity *s* ∈ {S1,S2,S3}: `b = mean_S0(m)`, `d_s = mean_Ss(m)`, `w_s = max(0, sign·(d_s − b))`, `r_qms = 1 − clip(w_s / scale_m(b), 0, 1)`, `r_qm = (r_S1 + r_S2 + 2·r_S3)/4`, `Axis_a = 100·mean(r_qm)`, `CDB = mean(Safety, Comfort, Operation)`. Improvement is not rewarded; undefined cells (TTC without an actor, route completion for the controlled stop) are skipped, never imputed; every entry is normalised to its own S0. Intervals: 95 % percentile bootstrap over runs resampled within each scenario × severity cell (2 000 draws, seed 20260907). Full text: `docs/methodology.html`.
+For scenario *q*, metric *m* on axis *a*, severity *s* ∈ {S1,S2,S3}: `b = mean_S0(m)`, `d_s = mean_Ss(m)`, `w_s = max(0, sign·(d_s − b))`, `r_qms = 1 − clip(w_s / scale_m(b), 0, 1)`, `r_qm = (r_S1 + r_S2 + 2·r_S3)/4`, `Axis_a = 100·mean(r_qm)`, `CDB = mean(Safety, Comfort & handling, Operation)`. Improvement is not rewarded; undefined cells (TTC without an actor, route completion for the controlled stop) are skipped, never imputed; every entry is normalised to its own S0. Intervals: 95 % percentile bootstrap over runs resampled within each scenario × severity cell (2 000 draws, seed 20260907). Full text: `docs/methodology.html`.
 
-Metric registry and scales: `cdb_score/spec.py` (Safety 7 metrics incl. handling, Comfort 6, Operation 4).
+Metric registry and scales: `cdb_score/spec.py` (Safety 4 metrics; Comfort & handling 9, including MRM / hard / severe braking; Operation 4).
 
 ## Reference entry
 
-`autoware-0.3.8_bevfusion-lidar_baseline` — built from `formal28_pattern_extraction_20260915/input_snapshot/remote_derived_evidence/<run>/metrics/full_metrics.json` for the 140 runs in `formal_140_run_selection.json` (7,418/7,418 derived files hash-verified). Pending rows in `registry/models.json` are configurations available in the reference stack that have **not** been run; they carry no numbers.
+`autoware-0.3.8_bevfusion-lidar_baseline` — built from `formal28_pattern_extraction_20260915/input_snapshot/remote_derived_evidence/<run>/metrics/full_metrics.json` for the 140 runs in `formal_140_run_selection.json` (7,418/7,418 derived files hash-verified). v1.1 reference scores: **CDB 88.93** (95 % CI 84.53–91.75), **Safety 89.67** (83.09–95.75), **Comfort & handling 78.76** (70.73–84.44), **Operation 98.35** (95.62–98.65). Pending rows in `registry/models.json` are configurations available in the reference stack that have **not** been run; they carry no numbers.
 
 ## Mechanism Robustness (`docs/mechanisms.html`)
 

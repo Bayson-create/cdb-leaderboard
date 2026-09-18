@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Callable, Optional
 
-SPEC_VERSION = "cdb-score/1.0"
+SPEC_VERSION = "cdb-score/1.1"
 
 SEVERITIES = ["S0", "S1", "S2", "S3"]
 SEVERITY_WEIGHTS = {"S1": 1.0, "S2": 1.0, "S3": 2.0}  # S3 counts double
@@ -51,7 +51,7 @@ SCENARIO_BY_SLUG = {s.slug: s for s in SCENARIOS}
 PIPELINE_TO_SLUG = {s.pipeline_slug: s.slug for s in SCENARIOS}
 
 AXES = ["safety", "comfort", "operation"]
-AXIS_DISPLAY = {"safety": "Safety", "comfort": "Comfort", "operation": "Operation"}
+AXIS_DISPLAY = {"safety": "Safety", "comfort": "Comfort & handling", "operation": "Operation"}
 
 @dataclass(frozen=True)
 class Metric:
@@ -71,7 +71,7 @@ def _rel(frac: float, floor: float = 0.0) -> Callable[[float], float]:
     return lambda b: max(frac * abs(b), floor)
 
 METRICS: list[Metric] = [
-    # ---- Safety (handling is folded into safety, as in thesis Table C) ----
+    # ---- Safety (vehicle-outcome safety endpoints; handling moved to Comfort & handling in v1.1) ----
     Metric("safety.collision_count", "safety", "Collisions", "count", "lower",
            lambda b: 1.0, "1 collision", absolute_column=True),
     Metric("safety.min_ttc_s", "safety", "Minimum TTC", "s", "higher",
@@ -80,13 +80,13 @@ METRICS: list[Metric] = [
            _rel(1.0, 8.0), "S0 value (min 8 /km)", requires="safety.ttc_applicable"),
     Metric("safety.lane_invasion_count", "safety", "Lane invasions", "count", "lower",
            _rel(1.0, 2.0), "S0 value (min 2)"),
-    Metric("safety.mrm_event_count", "safety", "MRM events", "count", "lower",
+    Metric("safety.mrm_event_count", "comfort", "MRM events", "count", "lower",
            _rel(1.0, 2.0), "S0 value (min 2)"),
-    Metric("event_rates.hard_braking.per_km", "safety", "Hard braking", "/km", "lower",
+    Metric("event_rates.hard_braking.per_km", "comfort", "Hard braking", "/km", "lower",
            _rel(1.0, 40.0), "S0 value (min 40 /km)"),
-    Metric("event_rates.severe_braking.per_km", "safety", "Severe braking", "/km", "lower",
+    Metric("event_rates.severe_braking.per_km", "comfort", "Severe braking", "/km", "lower",
            _rel(1.0, 20.0), "S0 value (min 20 /km)"),
-    # ---- Comfort ----
+    # ---- Comfort & handling (handling folded in, matching thesis §3.6.2) ----
     Metric("comfort.max_longitudinal_jerk_mps3", "comfort", "Max longitudinal jerk", "m/s³", "lower",
            _rel(1.0, 20.0), "S0 value (min 20 m/s³)"),
     Metric("comfort.max_jerk_vector_magnitude_mps3", "comfort", "Max jerk magnitude", "m/s³", "lower",

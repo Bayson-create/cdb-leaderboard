@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  score:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Validate reference submission
+        run: python -m cdb_score validate submissions/autoware-0.3.8_bevfusion-lidar_baseline
+      - name: Score reference submission
+        run: python -m cdb_score score submissions/autoware-0.3.8_bevfusion-lidar_baseline
+      - name: Build twice and compare data
+        run: |
+          python -m cdb_score build --out /tmp/cdb-lb-a.json
+          python -m cdb_score build --out /tmp/cdb-lb-b.json
+          python - <<'PY'
+          import json
+          a = json.load(open("/tmp/cdb-lb-a.json"))
+          b = json.load(open("/tmp/cdb-lb-b.json"))
+          for d in (a, b):
+              d.pop("generated_at_utc", None)
+          assert a == b, "leaderboard build is not deterministic"
+          print("leaderboard build deterministic; spec", a["spec_version"])
+          PY

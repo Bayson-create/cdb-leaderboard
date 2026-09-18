@@ -1,7 +1,7 @@
 {
  "schema": "cdb-leaderboard/1.0",
- "spec_version": "cdb-score/1.0",
- "generated_at_utc": "2026-09-16T12:25:40+00:00",
+ "spec_version": "cdb-score/1.1",
+ "generated_at_utc": "2026-09-18T11:01:59+00:00",
  "matrix": {
   "scenarios": [
    {
@@ -122,7 +122,7 @@
   },
   {
    "key": "safety.mrm_event_count",
-   "axis": "safety",
+   "axis": "comfort",
    "display": "MRM events",
    "unit": "count",
    "better_when": "lower",
@@ -131,7 +131,7 @@
   },
   {
    "key": "event_rates.hard_braking.per_km",
-   "axis": "safety",
+   "axis": "comfort",
    "display": "Hard braking",
    "unit": "/km",
    "better_when": "lower",
@@ -140,7 +140,7 @@
   },
   {
    "key": "event_rates.severe_braking.per_km",
-   "axis": "safety",
+   "axis": "comfort",
    "display": "Severe braking",
    "unit": "/km",
    "better_when": "lower",
@@ -263,34 +263,34 @@
     "errors": []
    },
    "scores": {
-    "cdb_index": 87.45009804480685,
-    "safety": 81.14908617338105,
-    "comfort": 82.84791110989134,
+    "cdb_index": 88.93006911581831,
+    "safety": 89.67313633791844,
+    "comfort": 78.76377415838837,
     "operation": 98.35329685114814
    },
    "ci95": {
     "safety": [
-     74.57188068949279,
-     86.96687488191729
+     83.08569741751562,
+     95.74812700795215
     ],
     "comfort": [
-     73.86889094213478,
-     88.1725033380742
+     70.72574927262933,
+     84.4369025646286
     ],
     "operation": [
      95.62163926485086,
      98.65473215863946
     ],
     "cdb_index": [
-     82.55997479968809,
-     90.43151582404461
+     84.52956272334029,
+     91.7467054701688
     ]
    },
    "per_scenario": {
     "lead-stopped": {
      "axes": {
-      "safety": 85.67252821152209,
-      "comfort": 94.88155144923115,
+      "safety": 99.92692437016366,
+      "comfort": 85.47658985504299,
       "operation": 98.796052674414
      },
      "metrics": {
@@ -529,8 +529,8 @@
     },
     "lead-slow": {
      "axes": {
-      "safety": 60.89138497742702,
-      "comfort": 79.2872133160919,
+      "safety": 83.87936544205296,
+      "comfort": 62.93839033003653,
       "operation": 97.4528672427337
      },
      "metrics": {
@@ -776,8 +776,8 @@
     },
     "curved-urban-road": {
      "axes": {
-      "safety": 80.80337433747783,
-      "comfort": 80.26518654135293,
+      "safety": 100.0,
+      "comfort": 76.17866565950075,
       "operation": 98.63442518827692
      },
      "metrics": {
@@ -1009,8 +1009,8 @@
     },
     "pedestrian-emerge": {
      "axes": {
-      "safety": 99.90750862019794,
-      "comfort": 88.80217425855153,
+      "safety": 99.83814008534641,
+      "comfort": 92.53478283903436,
       "operation": 97.1289298131842
      },
      "metrics": {
@@ -1256,8 +1256,8 @@
     },
     "red-light-violator": {
      "axes": {
-      "safety": 96.3794941135185,
-      "comfort": 79.91721310780551,
+      "safety": 100.0,
+      "comfort": 83.79552638238474,
       "operation": 96.69746965158443
      },
      "metrics": {
@@ -1503,8 +1503,8 @@
     },
     "construction-obstacle": {
      "axes": {
-      "safety": 75.93715328343288,
-      "comfort": 87.57843251585543,
+      "safety": 95.51713960925244,
+      "comfort": 74.99578996023921,
       "operation": 99.87402234366026
      },
      "metrics": {
@@ -1750,8 +1750,8 @@
     },
     "dynamic-cut-in": {
      "axes": {
-      "safety": 68.35338485983307,
-      "comfort": 69.20360658035108,
+      "safety": 53.71381668965436,
+      "comfort": 75.42667408248006,
       "operation": 100.0
      },
      "metrics": {
@@ -5713,6 +5713,11 @@
    "date": "2026-09-16",
    "title": "CDB score v1.0",
    "text": "Degradation-robustness index published: S0-normalised retention per metric, S3 weighted \u00d72, three axes and an equal-weight CDB Index."
+  },
+  {
+   "date": "2026-09-18",
+   "title": "CDB score v1.1",
+   "text": "Handling metrics (MRM, hard and severe braking) moved from Safety to Comfort & handling to match the thesis family definition (\u00a73.6.2). Reference entry: CDB 88.93, Safety 89.67, Comfort & handling 78.76, Operation 98.35 (140 runs, 28/28 cells)."
   }
  ]
 }

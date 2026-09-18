@@ -4,7 +4,7 @@
   const D = window.CDB_DATA;
   if (!D) { console.error("CDB_DATA missing — run `python -m cdb_score build`"); return; }
 
-  const AXIS = { safety: "Safety", comfort: "Comfort", operation: "Operation" };
+  const AXIS = { safety: "Safety", comfort: "Comfort & handling", operation: "Operation" };
   const AXIS_COLOR = { safety: "var(--safety)", comfort: "var(--comfort)", operation: "var(--operation)", cdb_index: "var(--accent)" };
   const SCN = Object.fromEntries(D.matrix.scenarios.map(s => [s.slug, s]));
   const METRIC = Object.fromEntries(D.metrics.map(m => [m.key, m]));
