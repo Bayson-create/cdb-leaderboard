@@ -17,61 +17,119 @@
 <main class="wrap">
 <div class="with-toc" style="padding-top:40px">
   <nav class="toc" aria-label="Sections">
-    <a href="#what" class="active">What is scored</a>
+    <a href="#what" class="active">The question</a>
+    <a href="#words">Words used on this site</a>
     <a href="#bench">The bench</a>
-    <a href="#score">Score definition</a>
-    <a href="#metrics">Metric registry</a>
-    <a href="#uncertainty">Uncertainty</a>
-    <a href="#boundaries">Boundaries</a>
+    <a href="#score">How the score is computed</a>
+    <a href="#metrics">What is measured</a>
+    <a href="#uncertainty">How sure we are</a>
+    <a href="#boundaries">What the score does not say</a>
   </nav>
   <article class="prose">
     <h1 style="font-size:clamp(34px,5vw,52px)">Methodology</h1>
-    <p style="margin-top:14px;color:var(--muted)">Score spec <code data-spec></code>. The scoring code is the single source of truth: <code>cdb_score/spec.py</code> and <code>cdb_score/score.py</code> in the leaderboard repository.</p>
+    <p style="margin-top:14px;color:var(--muted)">Score version <code data-spec></code>. The numbers on this site are computed by a small published program; if this page and that program ever disagree, the program is what counts (for programmers: <code>cdb_score/spec.py</code> and <code>cdb_score/score.py</code> in the leaderboard repository).</p>
 
-    <h2 id="what">What is scored</h2>
-    <p>The bench does not score a detector. It scores what the <em>vehicle</em> did after a controlled loss of LiDAR information travelled through the complete driving stack — detection, validation, tracking, prediction, planning, control and the vehicle interface — in a closed loop where the world reacts to the vehicle. Every entry is one fixed software configuration (perception model, fusion mode, controller profile, stack build) driven through exactly the same matrix.</p>
-    <div class="callout">The three indices are <strong>degradation-robustness indices</strong>: how much of each endpoint the configuration keeps at S1–S3 relative to its own S0 reference. They are not absolute performance and are not comparable across different maps, routes or vehicle models. The thesis behind the bench reports a scenario-conditioned <em>profile</em> rather than a scalar; the CDB Index exists so that a leaderboard can be sorted, and the per-scenario heat table is always one click away.</div>
+    <h2 id="what">The question</h2>
+    <p>A self-driving car "sees" mostly through its sensors. One of the most important is <strong>LiDAR</strong>, a spinning laser scanner that measures the distance to everything around the car many times per second. In real life that picture gets worse: rain or fog swallows some of the laser returns, dirt covers part of the sensor, far-away objects return too few points.</p>
+    <p>This bench asks one question: <strong>when the LiDAR picture gets worse in a controlled way, how much of its normal driving does a given self-driving software keep?</strong> We do not grade the object detector on its own. We grade what the <em>car actually did</em> — did it get closer to hitting something, did it drive less smoothly, did it take longer to finish its trip?</p>
+    <div class="callout"><strong>Status: provisional.</strong> The score is useful for a first comparison of configurations (and only where their uncertainty ranges are clearly apart, see <a href="#uncertainty">How sure we are</a>), not as a final or official safety rating. It comes from the master's thesis behind this site, which labels it provisional because one correction (how contacts that happened <em>before</em> the degradation started should be counted) is still open. See <a href="#boundaries">What the score does not say</a>.</div>
 
-    <h2 id="bench">The bench</h2>
+    <h2 id="words">Words used on this site</h2>
     <table>
-      <tr><th>Simulator / vehicle / stack</th><td>CARLA 0.9.16, Town10HD, fixed step 0.05 s, scenario seed 20260805 · vEDGAR 1.0.3 vehicle and bridge · Autoware (TUM <code>tum_launch</code>), NDT + EKF localisation, baseline MPC controller</td></tr>
-      <tr><th>Registered intervention</th><td><code>content_range_clip</code>: on the concatenated LiDAR cloud, remove all points beyond a fixed 50 m planar range, then keep every remaining point with seeded probability 0.75 / 0.50 / 0.25 for S1 / S2 / S3; S0 is identity. Applied to the perception consumer only; localisation keeps the nominal cloud. Request, application and confirmation are stamped on the simulation clock.</td></tr>
-      <tr><th>Scenarios (7)</th><td>Stopped lead (controlled stop) · Slow lead (2.5 m/s, 30 m ahead) · Urban curve (no actor) · Occluded pedestrian (crossing from behind a parked car) · Cross traffic (vehicle entering the junction at 7 m/s; ego signal forced green) · Construction obstacle (static, blocking the lane) · Dynamic cut-in (4 m/s from the adjacent lane)</td></tr>
-      <tr><th>Matrix</th><td>7 × {S0, S1, S2, S3} × 5 unique accepted repeats = 140 runs, 28 / 28 cells. One accepted run is the unit of analysis; messages, frames and objects never increase n.</td></tr>
-      <tr><th>Acceptance gate</th><td>Intervention records complete (one request, one application, one confirmation inside the run) · sensor cadence unchanged before and after the trigger · required stage, trajectory, command and vehicle-state records present · derived files hash-verified. Rejected attempts are kept as exclusions and never occupy a slot.</td></tr>
+      <tr><th>Driving software (stack)</th><td>The whole program that drives the car: it finds objects in the sensor data, follows them over time, predicts where they go, plans a path and steers, brakes and accelerates. Here it is <em>Autoware</em>, a widely used open-source self-driving software. An <strong>entry</strong> on the leaderboard is one fixed version of it, for example with a different object detector.</td></tr>
+      <tr><th>Simulation</th><td>Everything happens in a driving simulator (<em>CARLA</em>) with a realistic city map and a simulated research car (<em>vEDGAR</em>, a digital copy of the TUM test vehicle EDGAR). Nobody is put at risk and every run can be repeated exactly.</td></tr>
+      <tr><th>Closed loop</th><td>The software really drives the simulated car, and the simulated world reacts: if the car brakes late, the gap to the car in front really shrinks. This is different from replaying recorded data, where the software's decisions change nothing.</td></tr>
+      <tr><th>Point cloud</th><td>What one LiDAR scan produces: a list of 3-D points, each one a spot where a laser beam hit something.</td></tr>
+      <tr><th>Degradation</th><td>A deliberate, measured worsening of the point cloud before the driving software gets it. On this leaderboard it is always the same kind: far points are cut off and some of the remaining points are removed (details under <a href="#bench">The bench</a>).</td></tr>
+      <tr><th>Level S0–S3</th><td>How strong the degradation is. <strong>S0</strong> is the normal, undamaged picture (the reference). <strong>S1, S2, S3</strong> are three levels of damage: mild, medium and strong. The labels only make sense inside this one kind of degradation.</td></tr>
+      <tr><th>Random seed</th><td>A number that fixes every "random" choice in advance, so that a rerun makes exactly the same choices. It makes the experiment repeatable.</td></tr>
+      <tr><th>Scenario</th><td>One of seven short traffic situations, such as a slow car ahead or a pedestrian stepping out from behind a parked car.</td></tr>
+      <tr><th>Run</th><td>One complete drive of one scenario at one level. Each combination of scenario and level (a <strong>cell</strong>) is driven five times (five <strong>repeats</strong>), because small timing differences make no two drives identical.</td></tr>
+      <tr><th>Retention</th><td>The share of normal behaviour that is kept: 1 means "exactly as good as at S0", 0 means "lost everything we allow it to lose". Scores on the site are retention × 100.</td></tr>
     </table>
 
-    <h2 id="score">Score definition</h2>
-    <p>For every scenario <em>q</em>, metric <em>m</em> on axis <em>a</em>, and severity <em>s</em> ∈ {S1, S2, S3}:</p>
-    <pre>b      = mean over the five S0 runs of m            (baseline)
-d_s    = mean over the five Ss runs of m
-w_s    = max(0, sign_m · (d_s − b))                  (worsening; sign = +1 when lower is better, −1 when higher is better)
-r_qms  = 1 − clip(w_s / scale_m(b), 0, 1)            (retention, 0…1)
-r_qm   = (r_S1 + r_S2 + 2·r_S3) / 4                  (S3 counts double)
-Axis_a = 100 · mean over q and m∈a of r_qm
-CDB    = (Safety + Comfort &amp; handling + Operation) / 3</pre>
+    <h2 id="bench">The bench</h2>
+    <p>"The bench" is the fixed test course every entry goes through. Only the part being compared (for example the object detector) changes between entries; everything else stays identical.</p>
+    <h3>What happens in one run</h3>
+    <ol>
+      <li>The simulated car starts at the same place on the same city map (CARLA Town10HD) and gets the same destination.</li>
+      <li>The traffic situation of the scenario is placed on the road (for example a car 30 m ahead that then drives slowly).</li>
+      <li>The driving software takes control. 20 simulated seconds later, the degradation for this run's level is switched on and stays on until the end.</li>
+      <li>The run ends when the car has stopped at its goal or can no longer make progress. Every recorded value is written to a per-run file, <code>full_metrics.json</code>.</li>
+    </ol>
+    <h3>The degradation that is applied</h3>
+    <p>At every damage level, all LiDAR points farther than <strong>50 m</strong> from the car are removed. Then each remaining point is kept only by chance (with a fixed random seed, so every run is reproducible): <strong>75 %</strong> of points are kept at S1, <strong>50 %</strong> at S2 and <strong>25 %</strong> at S3. At S0 nothing is removed.</p>
+    <p>The software uses the laser for two jobs: spotting other road users, and working out where the car itself is by matching the scan against a stored map (<em>localisation</em>). Only the spotting part gets the damaged picture; localisation keeps the normal one. That way a change in driving can be traced to missed or late-detected road users, not to the car getting lost.</p>
+    <p>Each run writes down three moments on the simulator's clock: when the damage was <em>asked for</em>, when the damage program <em>started changing</em> the data, and when the first damaged scan <em>reached</em> the driving software. If the three are close together, the damage started when intended; a large gap would reveal a delay, and the run would be checked.</p>
+    <h3>The seven scenarios</h3>
+    <table>
+      <tr><th>Stopped lead</th><td>A car stands still 25 m ahead in the lane; the test car must stop behind it. (There is no finish line here, so "route completion" is not scored for this scenario.)</td></tr>
+      <tr><th>Slow lead</th><td>A car 30 m ahead drives at only 2.5 m/s (9 km/h); the test car must follow it.</td></tr>
+      <tr><th>Urban curve</th><td>A curved city road with no other road users. This is the <em>control</em> scenario: if something changes here, it cannot be because an object was missed.</td></tr>
+      <tr><th>Occluded pedestrian</th><td>A pedestrian steps out from behind a parked car 32 m ahead and crosses at 1.2 m/s.</td></tr>
+      <tr><th>Cross traffic</th><td>At a junction, another car enters at 7 m/s against its red light while the test car has green. This tests whether the car avoids a conflict, not whether it obeys traffic lights.</td></tr>
+      <tr><th>Construction obstacle</th><td>A fixed obstacle blocks the lane 32 m ahead. The software stops and waits in front of it instead of driving around it, so the car never reaches the goal: route completion is about 17 % at every level, including the normal one. Because every level is compared with the normal runs, this low value alone does not lower the score; only extra losses do.</td></tr>
+      <tr><th>Dynamic cut-in</th><td>A car in the neighbouring lane, 28 m ahead, moves into the test car's lane at 4 m/s.</td></tr>
+    </table>
+    <h3>How many runs, and which ones count</h3>
+    <p>7 scenarios × 4 levels × 5 repeats = <strong>140 runs</strong> for a complete entry. A run only counts if an automatic check accepts it: the degradation was really applied (we measure the point count, we don't just trust the setting), the sensor kept sending data at the normal rate, and every required record is present and matches its checksum (a fingerprint that shows the file was not changed afterwards). A run that fails the check is kept on a separate list of rejected runs and is repeated; it never fills a slot.</p>
+    <p>The simulator settings are fixed for every entry: CARLA version 0.9.16; the simulated world moves forward in steps of 0.05 s (20 steps per simulated second); the same random seed (20260805) places the traffic; the same simulated car (vEDGAR 1.0.3); Autoware set up with the Technical University of Munich's standard configuration; and the same controller (the part that turns a planned path into steering and pedal commands).</p>
+
+    <h2 id="score">How the score is computed</h2>
+    <p>The idea in one sentence: <strong>for every measurement, compare the degraded runs with the same entry's own normal (S0) runs, count only the part that got worse, and express it as a share of an allowed amount.</strong></p>
+    <h3>Worked example</h3>
+    <p>Reference entry, <em>Slow lead</em> scenario, measurement <em>completion time</em> (how long the trip took; shorter is better). Average over the five runs at each level:</p>
+    <table>
+      <tr><th>Level</th><th>Completion time</th><th>Got worse by</th><th>Retention</th></tr>
+      <tr><td>S0 (normal)</td><td>127.3 s</td><td>—</td><td>—</td></tr>
+      <tr><td>S1</td><td>129.3 s</td><td>2.0 s</td><td>1 − 2.0 / 31.8 = 0.94</td></tr>
+      <tr><td>S2</td><td>130.0 s</td><td>2.7 s</td><td>1 − 2.7 / 31.8 = 0.91</td></tr>
+      <tr><td>S3</td><td>131.4 s</td><td>4.1 s</td><td>1 − 4.1 / 31.8 = 0.87</td></tr>
+    </table>
+    <ol>
+      <li><strong>Allowed amount (the "scale").</strong> For completion time it is 25 % of the normal time: 0.25 × 127.3 s = 31.8 s. Getting 31.8 s slower or more would give retention 0.</li>
+      <li><strong>Retention per level</strong> = 1 − (how much worse ÷ allowed amount), kept between 0 and 1.</li>
+      <li><strong>Combine the levels</strong>, counting the strongest level S3 twice: (0.94 + 0.91 + 2 × 0.87) ÷ 4 = <strong>0.90</strong>.</li>
+      <li>Do this for every measurement in every scenario. Each group score (<strong>Safety</strong>, <strong>Comfort &amp; handling</strong>, <strong>Operation</strong>) is the plain average of all its scenario-and-measurement values, each counting equally, × 100. Skipped pairs (see below) are simply left out of that average. The <strong>CDB Index</strong> is the plain average of the three group scores.</li>
+    </ol>
+    <h3>Four rules that follow from this</h3>
     <ul>
-      <li><strong>Improvement is not rewarded.</strong> A metric that gets better under degradation (for example a faster completion time in the cut-in task) retains 1.0, no more. The index measures loss, not gain.</li>
-      <li><strong>Scale.</strong> Each metric has a registered normalising scale so that S0 values near zero cannot blow up the ratio: mostly the S0 value with a floor, 25 % of the S0 completion time, and exactly one event for collisions and blocked events (any new collision at a severity zeroes that severity's retention).</li>
-      <li><strong>Undefined cells are skipped, not imputed.</strong> TTC metrics apply only where <code>ttc_applicable</code> is true (not on the actor-free curve); route completion is undefined for the controlled stop.</li>
-      <li><strong>No pooling across configurations.</strong> Every entry is normalised to its own S0. Two entries with different S0 behaviour can both score 100 if neither loses anything under degradation — which is the question the bench asks.</li>
+      <li><strong>Getting better earns nothing.</strong> If a measurement improves under degradation (for example a faster trip), its retention is simply 1. The score measures loss, not gain.</li>
+      <li><strong>Every entry is compared with itself.</strong> A software that drives cautiously at S0 is not punished for that; only what it loses when the picture gets worse counts. Two entries with different normal behaviour can both score 100.</li>
+      <li><strong>Most allowed amounts equal the normal value itself.</strong> For most measurements, the allowed amount is the measurement's own S0 value: if a count doubles, that level's retention drops to 0. The table below lists each one.</li>
+      <li><strong>Allowed amounts have a minimum.</strong> If a normal value is close to zero (for example almost no jerky moments), a tiny change would otherwise look enormous, so each measurement has a floor (listed in the table below). For collisions and "blocked" events the allowed amount is exactly one: one new collision at a level sets that level's retention to 0.</li>
+      <li><strong>Missing is skipped, never guessed.</strong> Time-to-collision does not exist when there is no other road user (urban curve), and route completion does not exist for the stopped-lead task. These cells are left out, not filled with a made-up value.</li>
     </ul>
+    <details>
+      <summary>The same rules as a formula (optional; the worked example above is all you need)</summary>
+<pre>For scenario q, measurement m (in score group a), level s ∈ {S1, S2, S3}:
+b      = average of m over the S0 runs                    (normal value)
+d_s    = average of m over the runs at level s
+w_s    = max(0, sign · (d_s − b))                         (how much worse; sign = +1 if lower is better, −1 if higher is better)
+r_qms  = 1 − min(1, w_s / scale_m(b))                     (retention at level s, between 0 and 1)
+r_qm   = (r_S1 + r_S2 + 2 · r_S3) / 4                     (S3 counts twice)
+Group_a = 100 · average of r_qm over all scenarios q and measurements m in group a
+CDB     = (Safety + Comfort &amp; handling + Operation) / 3</pre>
+    </details>
 
-    <h2 id="metrics">Metric registry</h2>
-    <table id="metric-table"><thead><tr><th>Axis</th><th>Metric</th><th>Key in <code>full_metrics.json</code></th><th>Better when</th><th>Scale</th></tr></thead><tbody></tbody></table>
-    <p>Handling metrics (hard / severe braking, MRM) are folded into <strong>Comfort &amp; handling</strong>, matching the thesis family definition (thesis §3.6.2). The v1.1 spec therefore scores Safety over four vehicle-outcome endpoints, Comfort &amp; handling over nine dynamics/handling endpoints, and Operation over four task endpoints. Localisation and perception-count metrics are recorded per run and shown on the model page but do not enter the index, because they are internal stage signals rather than vehicle endpoints.</p>
+    <h2 id="metrics">What is measured</h2>
+    <p>Seventeen measurements, taken from the simulator's exact record of the car's motion (not from what the software believes). A few units, for scale: <strong>m/s²</strong> measures how quickly speed changes. Gravity is 9.8 m/s²; braking at 3 m/s² is a firm stop, like braking for an amber light, and above about 4 m/s² passengers are pushed noticeably into their seat belts. <strong>m/s³</strong> (jerk) measures how suddenly that push starts or stops: the "jolt". <strong>Yaw</strong> is the car turning left or right, like a spinning top seen from above; <strong>rad/s</strong> is turning speed (1 radian ≈ 57°). <strong>Per km</strong> means per kilometre driven. They fall into three groups, the same three the thesis uses: <strong>Safety</strong> asks whether the car would hit something; <strong>Comfort &amp; handling</strong> asks whether a passenger would feel uncomfortable or the software had to react abruptly; <strong>Operation</strong> asks whether the trip was completed and at what cost in time.</p>
+    <table id="metric-table"><thead><tr><th>Group</th><th>Measurement</th><th>What it means</th><th>Better when</th><th>Allowed amount (scale)</th></tr></thead><tbody></tbody></table>
+    <p>Hard braking, severe braking and emergency manoeuvres are counted under <strong>Comfort &amp; handling</strong>, not Safety. This follows the thesis, which treats them as signs of how abruptly the car had to react, while Safety is kept for outcomes (contact, closeness, leaving the lane). Signals from inside the software, such as how well the car located itself on the map or how many objects it detected, are recorded for every run but are not part of the score, because they are not something the car <em>did</em>.</p>
 
-    <h2 id="uncertainty">Uncertainty</h2>
-    <p>Intervals are 95 % percentile bootstrap intervals of the whole scoring pipeline: accepted runs are resampled with replacement inside every scenario × severity cell (2 000 draws, seed 20260907) and the axis and CDB indices are recomputed each time. With n = 5 per cell the intervals are wide by design; an entry whose interval overlaps another's is not reliably ranked above it.</p>
+    <h2 id="uncertainty">How sure we are</h2>
+    <p>With five runs per cell, chance plays a real role. To show how much, the whole score is recomputed 2,000 times, each time drawing the five runs of every cell again at random from the ones we have (some twice, some not at all; this is called a <em>bootstrap</em>). We sort the 2,000 results, drop the lowest 2.5 % and the highest 2.5 %, and show the range that is left next to each score, for example "85–92". This <strong>95 % interval</strong> is the range in which the score landed in 95 out of 100 recomputations.</p>
+    <p><strong>If two entries' intervals overlap, the data cannot tell which one is really more robust</strong>, even if their numbers differ. The leaderboard still lists entries from highest to lowest score, but a higher place only means something when the intervals are clearly apart.</p>
 
-    <h2 id="boundaries">Boundaries</h2>
+    <h2 id="boundaries">What the score does not say</h2>
     <ul>
-      <li>Results hold for the registered configuration only: this simulator, map, route, vehicle model, controller profile and intervention family. They are not a public-road safety rate.</li>
-      <li>A stage record locates where a change was first measured in the chain; it does not identify the component that caused the vehicle response. No component isolation or matched controller swap is part of the bench yet.</li>
-      <li>Severity labels are comparable only inside one intervention family. A future channel-, rate- or camera-degradation family will carry its own S0–S3 and its own index.</li>
-      <li>Zero collisions do not establish safety when braking, MRM activity, jerk or completion time change — which is why the three axes are reported separately and the absolute columns stay visible.</li>
+      <li><strong>It is not a real-world safety rating.</strong> It holds for this simulator, this map, this route, this vehicle model, this controller and this kind of degradation only. A score of 100 means "nothing measurable was lost here", not "safe".</li>
+      <li><strong>No collisions is not the same as safe.</strong> A car can avoid every collision and still brake later, drive more jerkily or take much longer. That is why the three groups are shown separately and the raw values stay visible in the table.</li>
+      <li><strong>The dynamic cut-in collisions happened before the degradation.</strong> In the reference entry, one of the five S3 runs of the cut-in scenario contains contacts between the two cars, and they pull that scenario's Safety score down. The contacts happened about 15 seconds <em>before</em> the damage was switched on (14.6 s and 14.8 s before, in the thesis's analysis). At that moment an "S3" run and an "S0" run are identical, since nothing has been damaged yet. So the contacts landed in an S3 run by chance, and none of them can be blamed on the degradation. The current score still counts every contact in a run. Counting only contacts after the switch-on is the open correction that keeps the score provisional.</li>
+      <li><strong>The score shows where a change appeared, not which part caused it.</strong> Finding out whether the detector, the tracker or the planner is responsible would need extra experiments that swap one part at a time; those are not part of the bench yet.</li>
+      <li><strong>Levels are only comparable within one kind of degradation.</strong> The thesis behind this site also tested other kinds of sensor damage: a laser with fewer beams, fewer scans per second, scans that arrive late, and the detector "forgetting" objects it had actually seen. "S3" here (points beyond 50 m removed, 25 % of the rest kept) is not the same amount of damage as "S3" of any of those. They are shown separately on the <a href="mechanisms.html">Mechanisms</a> page, never mixed into this index.</li>
+      <li><strong>This index is not the thesis's "robustness score".</strong> The thesis also reports its own robustness score, between 0 and 1, computed in a different way and over those other experiments. The two answer related but different questions, and their numbers must not be compared with each other.</li>
     </ul>
-    <p style="margin-top:14px">The severity-family boundary above is exactly why every other registered mechanism (channel, rate, perception delay, semantic target loss, distance thinning, ROI cutout) is reported on its own axis rather than folded into this index — see <a href="mechanisms.html">Mechanism Robustness</a> for that four-axis (spatial / density / temporal / semantic) view, its breaking points, and a benchmark comparison table.</p>
   </article>
 </div>
 </main>
@@ -80,7 +138,25 @@ CDB    = (Safety + Comfort &amp; handling + Operation) / 3</pre>
 <script src="assets/app.js"></script>
 <script>
 (function(){const D=window.CDB_DATA;if(!D)return;const A={safety:"Safety",comfort:"Comfort & handling",operation:"Operation"};
-document.querySelector("#metric-table tbody").innerHTML=D.metrics.map(m=>`<tr><td>${A[m.axis]}</td><td>${m.display}${m.absolute_column?' <span class="pill muted">absolute column</span>':''}</td><td><code>${m.key}</code></td><td>${m.better_when}</td><td>${m.scale}</td></tr>`).join("");})();
+const PLAIN={
+"safety.collision_count":"Number of times the car touched another road user or object.",
+"safety.min_ttc_s":"Time-to-collision: if both keep their current speed, how many seconds until they would touch. The smallest value in the run; smaller means a closer call.",
+"event_rates.ttc_warning.per_km":"How often that time-to-collision dropped below 3 s, per kilometre driven.",
+"safety.lane_invasion_count":"How often the car's outline crossed a painted lane line, for whatever reason.",
+"safety.mrm_event_count":"Minimal-risk manoeuvres: the software's own emergency routine (for example an automatic stop) when it judges it cannot continue normally. Counted under Comfort & handling because it describes how abruptly the software reacted, not an outcome such as a collision.",
+"event_rates.hard_braking.per_km":"Braking harder than 3 m/s² (a firm stop), per kilometre.",
+"event_rates.severe_braking.per_km":"Braking harder than 4.05 m/s² (clearly uncomfortable), per kilometre.",
+"comfort.max_longitudinal_jerk_mps3":"Jerk is how suddenly the acceleration changes: the jolt you feel. Largest forward/backward jolt in the run.",
+"comfort.max_jerk_vector_magnitude_mps3":"Largest jolt in any direction.",
+"comfort.max_yaw_acceleration_radps2":"How suddenly the turning speed changed (a sharp, twitchy steering input).",
+"comfort.max_yaw_rate_radps":"Fastest turning speed of the car around its vertical axis.",
+"comfort.max_lateral_acceleration_mps2":"Strongest sideways push felt in a turn.",
+"comfort.min_longitudinal_acceleration_mps2":"Peak deceleration = strongest braking in the run (deceleration means slowing down). Braking is stored as a negative acceleration, e.g. −3 m/s², so its allowed amount uses the size of the normal value without the minus sign; that is what the bars in |S0| mean.",
+"task_completion.completion_time_s":"How long the trip took.",
+"task_completion.no_progress_duration_s":"Total time spent standing still (below 0.1 m/s) before reaching the goal.",
+"task_completion.blocked_events":"Times the car stood still for more than 10 s in a row before the goal.",
+"task_completion.route_completion":"Share of the route that was driven (1 = reached the goal)."};
+document.querySelector("#metric-table tbody").innerHTML=D.metrics.map(m=>`<tr><td>${A[m.axis]}</td><td>${m.display}${m.unit&&m.unit!=="count"&&m.unit!=="fraction"?` <span class="dash">(${m.unit})</span>`:""}</td><td>${PLAIN[m.key]||""}</td><td>${m.better_when==="lower"?"lower":"higher"}</td><td>${m.scale}</td></tr>`).join("");})();
 </script>
 </body>
 </html>

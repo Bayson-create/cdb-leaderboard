@@ -1,0 +1,75 @@
+name: Submit results
+description: Submit a scored run package for the Controlled Degradation Bench leaderboard.
+title: "[Submission] "
+labels: ["submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A bot checks your package within a few minutes and replies here with the scores.
+        If the package is well formed, it opens a pull request that adds your entry; the leaderboard updates when that pull request is merged.
+        You need one **package.json** (format: `cdb-submission/1.0`, see SUBMISSION.md). Upload it somewhere reachable over https (a GitHub release asset, a gist "raw" link, or a file dragged into this form) and paste the link below.
+  - type: input
+    attributes:
+      label: Entry id
+      description: "Short unique id, lowercase letters, digits, '.', '_' or '-'. Example: myorg_centerpoint_baseline"
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Model name
+      description: "How the row is labelled on the leaderboard. Example: Autoware 0.3.8 · CenterPoint"
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Creator / organisation
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Detector
+      description: "The 3D object detector used. Example: centerpoint"
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Fusion mode
+      options:
+        - lidar
+        - camera_lidar_fusion
+        - camera
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Controller profile
+      description: "Example: baseline"
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Stack version
+      description: "Container image tag or release of the driving software. Example: autoware/microservice/mono:cuda-humble-x86_64-0.3.8"
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Commit
+      description: Optional source commit of your stack.
+  - type: input
+    attributes:
+      label: Package URL
+      description: https link to your package.json
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Notes
+      description: Optional. Anything the reader of the leaderboard should know about this configuration.
+  - type: checkboxes
+    attributes:
+      label: Confirmation
+      options:
+        - label: The runs were produced with the published bench (same scenarios, intervention and acceptance gate) and nothing in the package was edited by hand.
+          required: true

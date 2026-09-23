@@ -1,0 +1,48 @@
+name: Publish leaderboard
+
+# After a submission pull request is merged, rebuild docs/data/leaderboard.{json,js}
+# and redeploy GitHub Pages. The news feed and the "last submission" date are derived
+# from the registry, so they change only when a submission lands.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "submissions/**"
+      - "registry/**"
+      - "cdb_score/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Build leaderboard
+        run: python -m cdb_score build
+      - name: Commit data and redeploy Pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet -- docs/data; then
+            echo "leaderboard data unchanged"
+            exit 0
+          fi
+          git config user.name "cdb-leaderboard-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data/leaderboard.json docs/data/leaderboard.js
+          git commit -m "Rebuild leaderboard data"
+          git push
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/pages/builds" || echo "Pages will rebuild on its own"

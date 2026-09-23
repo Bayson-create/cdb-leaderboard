@@ -1,9 +1,4 @@
 {
- "updates": [
-  {"date": "2026-09-15", "title": "Formal matrix complete", "text": "7 scenarios × S0–S3 × 5 accepted repeats: 28/28 cells, 140 runs, 7,418/7,418 derived files hash-verified."},
-  {"date": "2026-09-16", "title": "CDB score v1.0", "text": "Degradation-robustness index published: S0-normalised retention per metric, S3 weighted ×2, three axes and an equal-weight CDB Index."},
-  {"date": "2026-09-18", "title": "CDB score v1.1", "text": "Handling metrics (MRM, hard and severe braking) moved from Safety to Comfort & handling to match the thesis family definition (§3.6.2). Reference entry: CDB 88.93, Safety 89.67, Comfort & handling 78.76, Operation 98.35 (140 runs, 28/28 cells)."}
- ],
  "entries": [
   {"id": "autoware-0.3.8_bevfusion-lidar_baseline", "model": "Autoware 0.3.8 · BEVFusion (LiDAR)", "creator": "TUM / Autoware", "detector": "bevfusion_lidar", "fusion_mode": "lidar", "controller_profile": "baseline", "stack_version": "autoware/microservice/mono:cuda-humble-x86_64-0.3.8", "commit": "aab6ae6e", "status": "real", "color": "#0a0a0a", "notes": "Thesis reference configuration: CARLA 0.9.16 Town10HD, vEDGAR 1.0.3, NDT/EKF localisation, baseline MPC controller."},
   {"id": "autoware-0.3.8_bevfusion-camera-lidar_baseline", "model": "Autoware 0.3.8 · BEVFusion (camera + LiDAR)", "creator": "TUM / Autoware", "detector": "bevfusion_camera_lidar", "fusion_mode": "camera_lidar_fusion", "controller_profile": "baseline", "stack_version": "autoware/microservice/mono:cuda-humble-x86_64-0.3.8", "status": "pending", "color": "#1f6feb", "notes": "Available in tum_models; run with --perception-profile camera_lidar. Not yet submitted."},

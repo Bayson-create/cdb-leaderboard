@@ -16,20 +16,18 @@ jobs:
           python-version: "3.12"
       - name: Unit tests
         run: python -m unittest discover -s tests -v
-      - name: Validate reference submission
-        run: python -m cdb_score validate submissions/autoware-0.3.8_bevfusion-lidar_baseline
-      - name: Score reference submission
-        run: python -m cdb_score score submissions/autoware-0.3.8_bevfusion-lidar_baseline
-      - name: Build twice and compare data
+      - name: Validate every submission package
+        run: |
+          set -e
+          for d in submissions/*/; do
+            [ -f "$d/package.json" ] || continue
+            rc=0; python -m cdb_score validate "$d" > /tmp/v.json || rc=$?
+            python -c "import json;v=json.load(open('/tmp/v.json'));print('$d', v['status'], v['n_cells_complete'], '/', v['n_cells_total'], 'cells')"
+            if [ "$rc" -ne 0 ] && [ "$rc" -ne 3 ]; then exit 1; fi
+          done
+      - name: Build twice and compare bytes
         run: |
           python -m cdb_score build --out /tmp/cdb-lb-a.json
           python -m cdb_score build --out /tmp/cdb-lb-b.json
-          python - <<'PY'
-          import json
-          a = json.load(open("/tmp/cdb-lb-a.json"))
-          b = json.load(open("/tmp/cdb-lb-b.json"))
-          for d in (a, b):
-              d.pop("generated_at_utc", None)
-          assert a == b, "leaderboard build is not deterministic"
-          print("leaderboard build deterministic; spec", a["spec_version"])
-          PY
+          cmp /tmp/cdb-lb-a.json /tmp/cdb-lb-b.json
+          echo "leaderboard build is byte-for-byte deterministic"

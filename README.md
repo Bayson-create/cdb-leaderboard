@@ -7,7 +7,7 @@ Design language after [artificialanalysis.ai](https://artificialanalysis.ai). No
 ```
 cdb_score/      scoring package: spec.py (metric registry) · validate.py · score.py · build.py · cli.py
 submissions/    one directory per entry, each with package.json (run-level metrics, 140 runs)
-registry/       models.json — leaderboard entries (real or pending) and the "Updates" feed
+registry/       models.json — leaderboard entries (real or pending); news and the "last submission" date are derived from each entry's submitted_at
 docs/           static site (served as GitHub Pages): index.html · model.html · methodology.html · submit.html · assets/ · data/
 tests/          unittest suite for the scorer
 ```

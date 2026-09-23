@@ -57,6 +57,9 @@ button { font: inherit; color: inherit; }
 .hero .lede { margin-top: 18px; font-size: 17px; max-width: 46ch; color: var(--fg); }
 .hero .lede .note { display: block; margin-top: 10px; color: var(--muted); font-size: 13.5px; }
 .updates { border-top: 1px solid var(--line); }
+.updates-head { color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; padding-top: 12px; }
+a.update { color: inherit; text-decoration: none; }
+a.update:hover .title { text-decoration: underline; }
 .update { display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 16px 0; border-bottom: 1px solid var(--line); }
 .update .eyebrow { color: var(--accent); font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
 .update .title { font-weight: 600; font-size: 15px; margin-top: 2px; }
@@ -169,6 +172,7 @@ table.heat td.scn .d { display: block; color: var(--muted); font-weight: 400; fo
 .prose table { border-collapse: collapse; width: 100%; font-size: 13.5px; margin: 10px 0; }
 .prose th, .prose td { border-bottom: 1px solid var(--line); padding: 7px 8px; text-align: left; vertical-align: top; }
 .prose th { background: var(--bg-soft); font-weight: 600; }
+.prose td code, .prose li code, .prose p code { overflow-wrap: anywhere; }
 .prose pre { background: var(--bg-soft); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-size: 12.5px; line-height: 1.5; }
 .callout { border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 8px; padding: 12px 14px; background: var(--accent-soft); font-size: 13.5px; }
 .formula { font-family: ui-monospace, Menlo, monospace; background: var(--bg-soft); padding: 2px 6px; border-radius: 4px; }
@@ -176,11 +180,21 @@ footer { border-top: 1px solid var(--line); margin-top: 40px; padding-block: 24p
 footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
 
 @media (max-width: 900px) {
-  .hero { grid-template-columns: 1fr; gap: 24px; padding-block: 36px 24px; }
-  .cards { grid-template-columns: 1fr; }
-  .with-toc { grid-template-columns: 1fr; }
+  .hero { grid-template-columns: minmax(0, 1fr); gap: 24px; padding-block: 36px 24px; }
+  .cards { grid-template-columns: minmax(0, 1fr); }
+  .with-toc { grid-template-columns: minmax(0, 1fr); }
   .toc { display: none; }
-  .grid2 { grid-template-columns: 1fr; }
+  .grid2 { grid-template-columns: minmax(0, 1fr); }
   h2 { font-size: 26px; }
 }
+@media (max-width: 640px) {
+  .topbar .wrap { height: auto; flex-wrap: wrap; padding-block: 10px; row-gap: 8px; }
+  .nav { width: 100%; min-width: 0; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav .btn { flex: 0 0 auto; }
+  .prose table { display: block; overflow-x: auto; }
+}
+.kv dd, .kv dt { overflow-wrap: anywhere; min-width: 0; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+tr.partial td { background: var(--bg-soft, #fafafa); }

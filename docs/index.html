@@ -25,8 +25,8 @@
   <section class="hero">
     <div>
       <h1>Independent<br>closed-loop evaluation<br>of AD stacks</h1>
-      <p class="lede">How much Safety, Comfort &amp; handling and Operation does an automated-driving software stack keep when its LiDAR information is degraded in a controlled way? The bench drives every stack through the same seven traffic tasks, four registered severities and five repeats inside a CARLA · vEDGAR · Autoware loop, and scores what the vehicle actually did.
-        <span class="note">Scores are <strong>degradation-robustness indices</strong>: S0-normalised retention of each endpoint, not absolute performance. One configuration, one map, one controller profile per entry. <a href="methodology.html">Read the methodology →</a></span></p>
+      <p class="lede">Self-driving software sees the road mostly through a laser scanner (LiDAR). This site measures how much of its normal driving the software keeps when that picture is deliberately made worse, step by step, in a driving simulator. Every entry drives the same seven traffic situations, with the normal picture and three levels of damage, five times each. We score what the car actually did, in three groups: <strong>Safety</strong> (did it get close to hitting something), <strong>Comfort &amp; handling</strong> (did it brake, swerve or jolt more) and <strong>Operation</strong> (did it finish the trip, and how much longer did it take).
+        <span class="note">A score of 100 means the software kept all of its normal driving when the sensor got worse; lower means it lost some. Each entry is compared only with its own normal driving, so the score measures robustness, not how good the driving is overall. Scores are <strong>provisional</strong>: one counting rule is still being corrected (see the <a href="methodology.html#boundaries">methodology</a>), and two entries whose uncertainty ranges overlap should not be called better or worse than each other. <a href="methodology.html">How the score works →</a></span></p>
     </div>
     <aside class="updates" id="updates" aria-label="Updates"></aside>
   </section>
@@ -34,7 +34,7 @@
   <div class="with-toc">
     <nav class="toc" aria-label="Sections">
       <a href="#highlights" class="active">Highlights</a>
-      <a href="#leaderboard">Leaderboard <span class="tag">· v1.0</span></a>
+      <a href="#leaderboard">Leaderboard</a>
       <a href="#scenarios">Scenario breakdown</a>
       <a href="#matrix">The bench</a>
       <a href="methodology.html">Methodology ↗</a>
@@ -45,7 +45,7 @@
       <section class="section" id="highlights">
         <div class="section-head"><span class="eyebrow">Highlights</span><span class="sub">Robustness index 0–100 · higher is better · 95 % run-level bootstrap interval in the table</span></div>
         <div class="cards">
-          <div class="card"><div class="card-title"><h3><span class="swatch" style="background:var(--safety)"></span>Safety</h3><span class="pill accent">Updated</span></div><p class="desc">Collisions, minimum TTC, TTC warnings and lane invasions — retained at S1–S3 relative to S0.</p><div class="chart" id="chart-safety"></div><div class="foot"><span>4 metrics × 7 scenarios</span><span>S3 weighted ×2</span></div></div>
+          <div class="card"><div class="card-title"><h3><span class="swatch" style="background:var(--safety)"></span>Safety</h3></div><p class="desc">Collisions, minimum TTC, TTC warnings and lane invasions — retained at S1–S3 relative to S0.</p><div class="chart" id="chart-safety"></div><div class="foot"><span>4 metrics × 7 scenarios</span><span>S3 weighted ×2</span></div></div>
           <div class="card"><div class="card-title"><h3><span class="swatch" style="background:var(--comfort)"></span>Comfort &amp; handling</h3></div><p class="desc">Longitudinal jerk, jerk magnitude, yaw acceleration, yaw rate, lateral acceleration, peak deceleration, MRM events and hard / severe braking — dynamic burden and emergency handling.</p><div class="chart" id="chart-comfort"></div><div class="foot"><span>9 metrics × 7 scenarios</span><span>S3 weighted ×2</span></div></div>
           <div class="card"><div class="card-title"><h3><span class="swatch" style="background:var(--operation)"></span>Operation</h3></div><p class="desc">Completion time, no-progress duration, blocked events and route completion — the operational cost of finishing the task.</p><div class="chart" id="chart-operation"></div><div class="foot"><span>4 metrics × 7 scenarios</span><span>S3 weighted ×2</span></div></div>
         </div>
@@ -99,23 +99,23 @@
       </section>
 
       <section class="section" id="matrix">
-        <div class="section-head"><span class="eyebrow">The bench</span><span class="sub">What every entry is driven through</span></div>
+        <div class="section-head"><span class="eyebrow">The bench</span><span class="sub">The fixed test course every entry drives through. Only the part being compared changes.</span></div>
         <div class="grid2">
           <div class="card">
-            <h3>Registered intervention</h3>
-            <p class="desc">Content range clip with thinning on the concatenated LiDAR cloud, applied post-capture to the perception consumer only (localisation keeps the nominal cloud). All points beyond a fixed 50 m planar range are removed, then every remaining point is kept with a seeded probability of 0.75 (S1), 0.50 (S2) or 0.25 (S3). S0 is the unmodified reference. The intervention is time-stamped (requested → applied → confirmed) on the simulation clock and verified per run.</p>
+            <h3>What we do to the sensor</h3>
+            <p class="desc">The car's LiDAR (a laser scanner that measures distances as a cloud of 3-D points) is made worse on purpose. <strong>S0</strong> is the normal, undamaged picture; <strong>S1, S2 and S3</strong> are three levels of damage. At each damage level every point farther than 50 m is removed, and of the remaining points only 75 % (S1), 50 % (S2) or 25 % (S3) are kept. Which points survive is random, but the random choices are fixed in advance so every rerun is identical. The software also uses the laser to work out where the car is on its map; that part keeps the normal picture, so only the spotting of other road users is tested. The damage is switched on 20 simulated seconds after the car starts driving, and every run counts the laser points before and after to prove the damage really took effect.</p>
           </div>
           <div class="card">
-            <h3>Matrix and acceptance</h3>
-            <p class="desc">7 scenarios × 4 severities × 5 unique accepted repeats = 140 runs, 28 of 28 cells. A run enters the matrix only after the data gate accepts it: intervention records complete, sensor cadence unchanged, required stage and vehicle records present, derived files hash-verified. Rejected attempts are retained as exclusions and never fill a slot.</p>
+            <h3>How many drives, and which count</h3>
+            <p class="desc">7 traffic situations × 4 levels (normal + 3 damage levels) × 5 repeats = <strong>140 drives</strong> per entry. Each combination is driven five times because tiny timing differences make no two drives exactly alike. A drive only counts if an automatic check confirms three things: the damage was really applied, the laser kept sending its usual 10 scans per second, and every record file is present and unedited. "Unedited" is checked with a digital fingerprint of each file (a SHA-256 hash), which changes completely if even one character is altered. Drives that fail the check are listed separately and redone; they never count.</p>
           </div>
           <div class="card">
-            <h3>Fixed environment</h3>
-            <p class="desc">CARLA 0.9.16 · Town10HD · fixed Δt 0.05 s · scenario seed 20260805 · vEDGAR 1.0.3 vehicle and bridge · Autoware (TUM tum_launch) with NDT/EKF localisation · baseline MPC controller. Only the perception model / stack build differs between entries.</p>
+            <h3>Everything else stays fixed</h3>
+            <p class="desc">Same driving simulator (CARLA 0.9.16) and city map (Town10HD), same simulated research car (vEDGAR 1.0.3, a digital copy of the test vehicle EDGAR of the Technical University of Munich), same start, same goal, same fixed random choices. The driving software is always Autoware, a widely used open-source self-driving program. Autoware can run different <em>object detectors</em> (the part that finds cars and people in the laser picture), with or without help from cameras. An entry states which detector and which of these options it uses; everything else, including the controller that turns the planned path into steering and pedal commands, stays the same. A different controller counts as a separate entry.</p>
           </div>
           <div class="card">
-            <h3>Seven traffic tasks</h3>
-            <p class="desc">Stopped lead · Slow lead · Urban curve · Occluded pedestrian · Cross traffic (ego signal forced green — a conflict test, not a compliance test) · Construction obstacle · Dynamic cut-in. Each task consumes spatial observation differently, which is why the index is reported per scenario before it is averaged.</p>
+            <h3>Seven traffic situations</h3>
+            <p class="desc"><strong>Stopped lead</strong>: stop behind a standing car. <strong>Slow lead</strong>: follow a car doing 9 km/h. <strong>Urban curve</strong>: an empty curved road, the control case with nothing to detect. <strong>Occluded pedestrian</strong>: someone steps out from behind a parked car. <strong>Cross traffic</strong>: a car runs its red light into the junction while ours has green. <strong>Construction obstacle</strong>: the lane is blocked. <strong>Dynamic cut-in</strong>: a car moves into our lane just ahead. Each situation needs the sensor for different things, so scores are shown per situation before they are averaged. <a href="methodology.html#bench">Full description →</a></p>
           </div>
         </div>
       </section>
@@ -124,8 +124,8 @@
 </main>
 
 <footer><div class="wrap">
-  <span>Controlled Degradation Bench · score spec <span data-spec></span> · data generated <span data-generated></span></span>
-  <span>Thesis: <em>An autonomous driving software benchmark for the robustness against sensor degradation</em> (TUM / Chalmers, 2026). Design language after artificialanalysis.ai.</span>
+  <span>Controlled Degradation Bench · score spec <span data-spec></span> · last submission <span data-generated></span></span>
+  <span>Thesis: <em>An autonomous driving software benchmark for the robustness against sensor degradation</em> (master's thesis, Technical University of Munich and Chalmers University of Technology, 2026). Page design inspired by artificialanalysis.ai.</span>
 </div></footer>
 
 <script src="data/leaderboard.js"></script>

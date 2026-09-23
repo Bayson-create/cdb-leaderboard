@@ -11,72 +11,73 @@
 <body>
 <header class="topbar"><div class="wrap">
   <a class="logo" href="index.html"><svg class="mark" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 13 L7 4 L11 11 L16 5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Controlled Degradation Bench</a>
-  <nav class="nav"><a class="btn ghost" href="index.html#leaderboard">← Leaderboard</a><a class="btn ghost" href="mechanisms.html">Mechanisms</a><a class="btn" href="methodology.html">Methodology</a></nav>
+  <nav class="nav"><a class="btn ghost" href="index.html#leaderboard">← Leaderboard</a><a class="btn ghost" href="mechanisms.html">Mechanisms</a><a class="btn" href="methodology.html">Methodology</a><a class="btn accent" href="https://github.com/Bayson-create/cdb-leaderboard/issues/new?template=submission.yml" target="_blank" rel="noopener">Open the form ↗</a></nav>
 </div></header>
 
 <main class="wrap">
 <div class="with-toc" style="padding-top:40px">
   <nav class="toc" aria-label="Steps">
-    <a href="#s1" class="active">1 · Plug in your model</a>
-    <a href="#s2">2 · Run the matrix</a>
-    <a href="#s3">3 · Package</a>
-    <a href="#s4">4 · Validate &amp; score</a>
-    <a href="#s5">5 · Submit</a>
+    <a href="#how" class="active">How it works</a>
+    <a href="#s1">1 · Run the bench</a>
+    <a href="#s2">2 · Make the package</a>
+    <a href="#s3">3 · Check it yourself</a>
+    <a href="#s4">4 · Submit</a>
+    <a href="#after">What happens next</a>
     <a href="#access">Access</a>
   </nav>
   <article class="prose">
     <h1 style="font-size:clamp(34px,5vw,52px)">Submit results</h1>
-    <p style="margin-top:14px">Any team can run its own perception model or stack build through the bench and appear on the leaderboard. The pipeline, matrix contract and scorer are the same ones that produced the reference entry; nothing is re-scored by hand.</p>
-    <div class="callout">Entries are accepted only as a complete 7 × 4 × 5 matrix that passes the validator. Partial matrices, extra repeats replacing rejected runs, or edited metric files are refused — the validator checks cell completeness, intervention timestamps and metric schema, and the build re-computes every number from run-level values.</div>
+    <p style="margin-top:14px">Anyone can drive their own configuration of the driving software through the bench and put it on the leaderboard. The same checks and the same scoring code that produced the reference entry are applied to every submission; nothing is scored by hand.</p>
+    <p><a class="btn accent" href="https://github.com/Bayson-create/cdb-leaderboard/issues/new?template=submission.yml" target="_blank" rel="noopener">Open the submission form ↗</a></p>
 
-    <h2 id="s1">1 · Plug in your model</h2>
-    <p>Three integration points exist in the reference pipeline (<code>ma-xie_vedgar_perception_degradation</code>):</p>
-    <table>
-      <tr><th>Swap a detector shipped with the stack</th><td>Set <code>lidar_detection_model</code> in <code>config/tum_launch/env</code> (<code>centerpoint</code>, <code>centerpoint_tiny</code>, <code>transfusion</code>, <code>pointpainting</code>, <code>bevfusion_lidar</code>, <code>bevfusion_camera_lidar</code>) and <code>model_path</code> to your <code>tum_models</code> checkout.</td></tr>
-      <tr><th>Camera–LiDAR fusion</th><td><code>run_full_pipeline.sh --perception-profile camera_lidar</code> mounts the 8-class fusion parameter set and engine and records <code>perception_profile.json</code>.</td></tr>
-      <tr><th>Bring your own detector</th><td>Subscribe to the degraded cloud on <code>/sensing/lidar/degraded/pointcloud</code> (the <code>--perception-input-topic</code>) and publish <code>autoware_perception_msgs/DetectedObjects</code> on <code>/perception/object_recognition/objects</code>. Everything downstream — validation, tracking, prediction, planning, control — stays the reference build so that the entry remains comparable.</td></tr>
-    </table>
-    <p>Keep <code>--controller-profile baseline</code> unless the entry is explicitly a controller comparison; a different profile is a different entry.</p>
-
-    <h2 id="s2">2 · Run the matrix</h2>
-<pre>python3 scripts/generate_supplementary_schedule.py --out formal_schedule.json --seed 20260902 --intervention content
-python3 scripts/run_supplementary_campaign.py \
-  --schedule formal_schedule.json --repo-dir . \
-  --recordings-root ~/recordings/cdb_&lt;entry&gt; --raw-root ~/raw/cdb_&lt;entry&gt; \
-  --registry registry.csv --exclusions exclusions.jsonl \
-  --intervention content --smoke-approval --storage-budget storage_budget.json \
-  --missing-only --execute --frame-conversion-verified</pre>
-    <p>Each accepted run directory contains <code>manifest.yaml</code>, <code>file_hashes.sha256</code> and <code>metrics/full_metrics.json</code>. Runs that fail the data gate are logged in <code>exclusions.jsonl</code> and the campaign re-attempts the slot (max 2 attempts) — it never promotes a rejected run.</p>
-
-    <h2 id="s3">3 · Package</h2>
-    <p>A submission is one <code>package.json</code>:</p>
-<pre>{
-  "schema": "cdb-submission/1.0",
-  "entry": {"id": "&lt;org&gt;_&lt;detector&gt;_&lt;controller&gt;", "model": "…", "creator": "…",
-            "detector": "…", "fusion_mode": "lidar|camera_lidar_fusion",
-            "controller_profile": "baseline", "stack_version": "…", "commit": "…"},
-  "runs": [ {"run_id": "…", "scenario": "lead-slow", "severity": "S2", "repeat": 3,
-             "metrics": { …subset of metrics/full_metrics.json… }, "source_sha256": "…"}, … 140 ],
-  "provenance": {"evidence_snapshot": "…", "hashes_verified": "n/n", "generated_at_utc": "…"}
-}</pre>
-    <p><code>python -m cdb_score demo-package template.json</code> writes an empty template; <code>cdb_score/spec.py::PACKAGE_METRIC_KEYS</code> lists the keys to copy. Scenario slugs: <code>lead-stopped</code>, <code>lead-slow</code>, <code>curved-urban-road</code>, <code>pedestrian-emerge</code>, <code>red-light-violator</code>, <code>construction-obstacle</code>, <code>dynamic-cut-in</code>.</p>
-
-    <h2 id="s4">4 · Validate &amp; score locally</h2>
-    <p>The current score specification is <code>cdb-score/1.1</code>: Safety 4 metrics, Comfort &amp; handling 9 metrics (including MRM / hard / severe braking), Operation 4 metrics.</p>
-<pre>python -m cdb_score validate submissions/&lt;entry-id&gt;      # PASS / FAIL with per-cell counts
-python -m cdb_score score    submissions/&lt;entry-id&gt;      # indices + 95 % intervals + per-scenario axes</pre>
-    <p>The validator output you will see for a complete matrix:</p>
-<pre>{"status": "PASS", "n_runs": 140, "n_cells_complete": 28, "n_cells_total": 28, "errors": [], "warnings": [ … ]}</pre>
-
-    <h2 id="s5">5 · Submit</h2>
+    <h2 id="how">How it works</h2>
     <ol>
-      <li>Add <code>submissions/&lt;entry-id&gt;/package.json</code> and an entry with <code>"status": "real"</code> to <code>registry/models.json</code>.</li>
-      <li>Open a pull request. CI runs <code>validate</code>, <code>build</code> and the unit tests; the leaderboard is regenerated from your run-level values.</li>
-      <li>Keep the raw run directories (rosbags, camera sidecars, CARLA ground truth) for one year so that an audit can re-derive <code>full_metrics.json</code> from source.</li>
+      <li>You drive the <a href="methodology.html#bench">bench</a> with your configuration and pack the per-run results into one file, <code>package.json</code>.</li>
+      <li>You upload that file anywhere reachable by an https link and fill in the <a href="https://github.com/Bayson-create/cdb-leaderboard/issues/new?template=submission.yml" target="_blank" rel="noopener">submission form</a> (a GitHub issue; you need a free GitHub account).</li>
+      <li>Within a few minutes a bot downloads the file, checks it, computes the scores and replies on your issue with a score table.</li>
+      <li>If the file is well formed, the bot opens a pull request that adds your entry. When a maintainer merges it, the leaderboard is rebuilt, your entry appears, and a "New submission" note with the date is shown on the home page. The date on this site only changes when a submission lands.</li>
+    </ol>
+    <div class="callout"><strong>Complete or incomplete.</strong> A <strong>complete</strong> package covers all 28 cells (7 traffic situations × 4 levels × 5 repeats = 140 runs) and is ranked with a CDB Index and intervals. An <strong>incomplete</strong> package that is otherwise correct is accepted, but it is shown only per traffic situation, marked "incomplete", and never ranked, because a total over fewer situations would not be comparable. A package with a broken or missing measurement, an unknown scenario, or a degraded run without proof that the degradation was applied is rejected with a list of what to fix.</div>
+
+    <h2 id="s1">1 · Run the bench</h2>
+    <p>The bench runner drives one row of a run list at a time on a machine with the reference simulator stack, retries a rejected run, and never lets a rejected run fill a slot. The list for a complete entry has 140 rows (<code>scenario,severity,repeat</code>).</p>
+<pre>python3 bench/cdb_bench_runner.py --matrix matrices/full_140.csv --out results/&lt;entry-id&gt; --execute</pre>
+    <p>Each accepted run leaves a folder with <code>manifest.yaml</code> and <code>metrics/full_metrics.json</code>, computed by the same <code>compute_run_metrics.py</code> that produced the reference entry. What you can change between entries:</p>
+    <table>
+      <tr><th>A detector that ships with the stack</th><td>Set <code>lidar_detection_model</code> (<code>centerpoint</code>, <code>centerpoint_tiny</code>, <code>transfusion</code>, <code>pointpainting</code>, <code>bevfusion_lidar</code>, <code>bevfusion_camera_lidar</code>) and <code>model_path</code> in the launch environment.</td></tr>
+      <tr><th>Your own detector</th><td>Read the degraded LiDAR data from <code>/sensing/lidar/degraded/pointcloud</code> and publish <code>autoware_perception_msgs/DetectedObjects</code> on <code>/perception/object_recognition/objects</code>. Everything after detection stays the reference build so the entry remains comparable.</td></tr>
+      <tr><th>Controller</th><td>Keep the baseline controller unless the entry is explicitly a controller comparison; a different controller is a different entry.</td></tr>
+    </table>
+
+    <h2 id="s2">2 · Make the package</h2>
+<pre>python -m cdb_score package --runs results/&lt;entry-id&gt;/runs --entry entry.json --out package.json</pre>
+    <p><code>entry.json</code> describes your configuration:</p>
+<pre>{"id": "myorg_centerpoint_baseline", "model": "Autoware 0.3.8 · CenterPoint", "creator": "My org",
+ "detector": "centerpoint", "fusion_mode": "lidar", "controller_profile": "baseline",
+ "stack_version": "autoware/microservice/mono:cuda-humble-x86_64-0.3.8", "commit": "…"}</pre>
+    <p>The command copies the scored measurements of every accepted run, adds each run's SHA-256 fingerprint and leaves out rejected runs. The package format is <code>cdb-submission/1.0</code>; <code>submissions/SCHEMA.json</code> in the repository describes it field by field.</p>
+
+    <h2 id="s3">3 · Check it yourself</h2>
+<pre>python -m cdb_score validate package.json   # PASS (complete), PARTIAL (incomplete) or FAIL, with reasons
+python -m cdb_score score    package.json   # the numbers the bot will post</pre>
+    <p>This is exactly the code the bot runs, so if it says PASS here it will say PASS on GitHub. The scoring code has no dependencies beyond Python 3.10+.</p>
+
+    <h2 id="s4">4 · Submit</h2>
+    <ol>
+      <li>Upload <code>package.json</code> so it has an https link: attach it to a GitHub release of your own repository, or paste it into a <a href="https://gist.github.com">gist</a> and use its "Raw" link.</li>
+      <li>Open the <a href="https://github.com/Bayson-create/cdb-leaderboard/issues/new?template=submission.yml" target="_blank" rel="noopener">submission form</a>, fill in the description of your configuration and paste the link.</li>
+      <li>Keep your raw run folders (recordings, simulator ground truth) for one year so that anyone can re-derive the measurements from source if a result is questioned.</li>
     </ol>
 
+    <h2 id="after">What happens next</h2>
+    <ul>
+      <li>The bot replies with ✅ (complete, scored), 🟡 (incomplete, accepted, not ranked) or ❌ (list of problems). Edit the issue to try again; it re-checks automatically.</li>
+      <li>✅ and 🟡 open a pull request titled <em>Submission: &lt;entry id&gt;</em>. Merging it rebuilds <code>leaderboard.json</code> and the site within a few minutes.</li>
+      <li>Your entry is compared with its own S0 runs, so you do not need to beat anyone at normal driving to score well; see <a href="methodology.html#score">how the score is computed</a>.</li>
+    </ul>
+
     <h2 id="access">Access to the reference stack</h2>
-    <p>The reference images (<code>autoware/microservice/mono:cuda-humble-x86_64-0.3.8</code>, <code>carla-ros2-release:tum_0.9.16_v2</code>, vEDGAR <code>1.0.3</code>) and the <code>tum_models</code> weights are hosted on the TUM LRZ GitLab registry and currently require an account there. A public, redistributable image set is the main open item before external submissions can be accepted at scale; until then, contact the maintainer to arrange access or a run on the reference machines.</p>
+    <p>The reference images (<code>autoware/microservice/mono:cuda-humble-x86_64-0.3.8</code>, CARLA <code>tum_0.9.16</code>, vEDGAR <code>1.0.3</code>) and the <code>tum_models</code> detector weights are hosted on the TUM LRZ GitLab registry and currently need an account there. A publicly downloadable image set is the main open item before outside teams can run the bench without help; until then, contact the maintainer to arrange access or a run on the reference machines.</p>
   </article>
 </div>
 </main>

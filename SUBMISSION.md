@@ -1,13 +1,30 @@
 # Submitting results to the Controlled Degradation Bench
 
-1. **Plug in your model** in the reference pipeline (`ma-xie_vedgar_perception_degradation`):
-   - shipped detector: set `lidar_detection_model` (`centerpoint`, `centerpoint_tiny`, `transfusion`, `pointpainting`, `bevfusion_lidar`, `bevfusion_camera_lidar`) and `model_path` in `config/tum_launch/env`;
-   - camera–LiDAR fusion: `run_full_pipeline.sh --perception-profile camera_lidar`;
-   - your own detector: subscribe to `/sensing/lidar/degraded/pointcloud` (`--perception-input-topic`) and publish `DetectedObjects` on `/perception/object_recognition/objects`; keep everything downstream at the reference build.
-   Keep `--controller-profile baseline` unless the entry is a controller comparison.
-2. **Run the full matrix** with `scripts/generate_supplementary_schedule.py` + `scripts/run_supplementary_campaign.py … --execute` (7 scenarios × S0–S3 × 5 accepted repeats). Rejected runs stay in `exclusions.jsonl`; slots are re-attempted, never filled by a rejected run.
-3. **Package**: one `package.json` (`schema: cdb-submission/1.0`) with `entry`, 140 `runs` (`run_id, scenario, severity, repeat, metrics ⊂ full_metrics.json, source_sha256`) and `provenance`. `python -m cdb_score demo-package template.json` writes a template; `cdb_score/spec.py::PACKAGE_METRIC_KEYS` lists the keys.
-4. **Validate and score locally**: the current score specification is `cdb-score/1.1` (Safety 4 metrics; Comfort & handling 9, including MRM / hard / severe braking; Operation 4). `python -m cdb_score validate <dir>` must print `"status": "PASS"` with 28/28 cells; `python -m cdb_score score <dir>` prints the indices and intervals you will see on the board.
-5. **Submit**: add `submissions/<entry-id>/package.json`, add the entry (`"status": "real"`) to `registry/models.json`, open a pull request. CI runs validate + build + tests and regenerates the leaderboard from run-level values. Keep raw run directories (rosbags, camera sidecars, CARLA ground truth) for one year for audit.
+**Short version:** run the bench, build `package.json`, check it locally, then open the
+[submission form](https://github.com/Bayson-create/cdb-leaderboard/issues/new?template=submission.yml).
+A bot validates and scores the package, replies on the issue, and opens a pull request;
+merging that pull request rebuilds the leaderboard.
 
-**Access.** The reference images (`autoware/microservice/mono:cuda-humble-x86_64-0.3.8`, `carla-ros2-release:tum_0.9.16_v2`, vEDGAR 1.0.3) and `tum_models` weights live on the TUM LRZ GitLab registry and require an account; a redistributable image set is the main open item before external submissions can be accepted at scale.
+1. **Run the bench** (7 scenarios × S0–S3 × 5 accepted repeats = 140 runs) with
+   `bench/cdb_bench_runner.py --matrix <list.csv> --out <dir> --execute` on a machine with the
+   reference stack. Each accepted run folder holds `manifest.yaml` and `metrics/full_metrics.json`
+   (from `compute_run_metrics.py`). Rejected attempts go to `exclusions.jsonl` and never fill a slot.
+   What may differ between entries: the detector (`lidar_detection_model`, `model_path`), your own detector
+   publishing `DetectedObjects` from `/sensing/lidar/degraded/pointcloud`, or, as a separate entry, the controller profile.
+2. **Package:** `python -m cdb_score package --runs <dir>/runs --entry entry.json --out package.json`
+   (format `cdb-submission/1.0`, see `submissions/SCHEMA.json`; per-run `source_sha256` is added automatically).
+3. **Check locally:** `python -m cdb_score validate package.json` → `PASS` (28/28 cells, ranked),
+   `PARTIAL` (well formed but incomplete: shown per scenario, never ranked) or `FAIL` (with reasons);
+   `python -m cdb_score score package.json` prints what the bot will post. Score spec `cdb-score/1.1`.
+4. **Submit** through the form with an https link to `package.json`. What the automation does:
+   - `.github/workflows/submission.yml` (on the issue): download (https only, ≤ 20 MB, JSON only, never executed),
+     validate, score, comment, and for PASS/PARTIAL push `submission/<id>` and open a pull request;
+   - `.github/workflows/ci.yml` (on pull requests and `main`): unit tests, validate every package, byte-identical rebuild;
+   - `.github/workflows/publish.yml` (after merge): tests, `cdb_score build`, commit `docs/data/leaderboard.{json,js}`, redeploy Pages.
+   The home-page news and "last submission" date are derived from `submitted_at` in `registry/models.json`,
+   so they change only when a submission lands.
+5. Keep raw run folders (recordings, CARLA ground truth) for one year for audit.
+
+**Access.** The reference images (`autoware/microservice/mono:cuda-humble-x86_64-0.3.8`, CARLA `tum_0.9.16`,
+vEDGAR 1.0.3) and `tum_models` weights live on the TUM LRZ GitLab registry and require an account;
+a redistributable image set is the main open item before outside teams can run the bench unaided.

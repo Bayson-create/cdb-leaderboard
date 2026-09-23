@@ -1,7 +1,7 @@
 {
- "schema": "cdb-leaderboard/1.0",
+ "schema": "cdb-leaderboard/1.1",
  "spec_version": "cdb-score/1.1",
- "generated_at_utc": "2026-09-18T11:01:59+00:00",
+ "last_submission_utc": null,
  "matrix": {
   "scenarios": [
    {
@@ -255,18 +255,21 @@
    "status": "real",
    "color": "#0a0a0a",
    "notes": "Thesis reference configuration: CARLA 0.9.16 Town10HD, vEDGAR 1.0.3, NDT/EKF localisation, baseline MPC controller.",
-   "validation": {
-    "status": "PASS",
-    "n_runs": 140,
-    "cells_complete": "28/28",
-    "warnings": 40,
-    "errors": []
-   },
+   "submitted_at": null,
+   "submission_url": null,
    "scores": {
     "cdb_index": 88.93006911581831,
     "safety": 89.67313633791844,
     "comfort": 78.76377415838837,
     "operation": 98.35329685114814
+   },
+   "validation": {
+    "status": "PASS",
+    "n_runs": 140,
+    "cells_complete": "28/28",
+    "warnings": 40,
+    "errors": [],
+    "coverage": []
    },
    "ci95": {
     "safety": [
@@ -5629,6 +5632,8 @@
    "status": "pending",
    "color": "#1f6feb",
    "notes": "Available in tum_models; run with --perception-profile camera_lidar. Not yet submitted.",
+   "submitted_at": null,
+   "submission_url": null,
    "scores": null,
    "validation": null
   },
@@ -5643,6 +5648,8 @@
    "status": "pending",
    "color": "#16a34a",
    "notes": "lidar_detection_model=centerpoint. Not yet submitted.",
+   "submitted_at": null,
+   "submission_url": null,
    "scores": null,
    "validation": null
   },
@@ -5657,6 +5664,8 @@
    "status": "pending",
    "color": "#16a34a",
    "notes": "lidar_detection_model=centerpoint_tiny. Not yet submitted.",
+   "submitted_at": null,
+   "submission_url": null,
    "scores": null,
    "validation": null
   },
@@ -5671,6 +5680,8 @@
    "status": "pending",
    "color": "#f59e0b",
    "notes": "lidar_detection_model=transfusion. Not yet submitted.",
+   "submitted_at": null,
+   "submission_url": null,
    "scores": null,
    "validation": null
   },
@@ -5685,6 +5696,8 @@
    "status": "pending",
    "color": "#6b1f7a",
    "notes": "lidar_detection_model=pointpainting. Not yet submitted.",
+   "submitted_at": null,
+   "submission_url": null,
    "scores": null,
    "validation": null
   },
@@ -5699,25 +5712,11 @@
    "status": "pending",
    "color": "#0a0a0a",
    "notes": "Controller-profile swap proposed in thesis \u00a75.4 (config/controller_profiles.yaml). Not yet run.",
+   "submitted_at": null,
+   "submission_url": null,
    "scores": null,
    "validation": null
   }
  ],
- "updates": [
-  {
-   "date": "2026-09-15",
-   "title": "Formal matrix complete",
-   "text": "7 scenarios \u00d7 S0\u2013S3 \u00d7 5 accepted repeats: 28/28 cells, 140 runs, 7,418/7,418 derived files hash-verified."
-  },
-  {
-   "date": "2026-09-16",
-   "title": "CDB score v1.0",
-   "text": "Degradation-robustness index published: S0-normalised retention per metric, S3 weighted \u00d72, three axes and an equal-weight CDB Index."
-  },
-  {
-   "date": "2026-09-18",
-   "title": "CDB score v1.1",
-   "text": "Handling metrics (MRM, hard and severe braking) moved from Safety to Comfort & handling to match the thesis family definition (\u00a73.6.2). Reference entry: CDB 88.93, Safety 89.67, Comfort & handling 78.76, Operation 98.35 (140 runs, 28/28 cells)."
-  }
- ]
+ "updates": []
 }

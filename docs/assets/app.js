@@ -12,7 +12,9 @@
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const $ = (sel, root = document) => root.querySelector(sel);
   const real = D.entries.filter(e => e.scores);
-  const pending = D.entries.filter(e => !e.scores);
+  const pending = D.entries.filter(e => !e.scores && !e.partial);
+  const partial = D.entries.filter(e => e.partial);
+  const withScenarios = [...real, ...partial];
 
   /* ---------- helpers ---------- */
   function heatColor(r) { // retention 0..1 -> soft red .. soft green
@@ -102,13 +104,17 @@
     const rows = filteredEntries();
     tbody.innerHTML = rows.map((e, i) => {
       const isReal = !!e.scores;
-      const name = isReal ? `<a href="model.html?id=${encodeURIComponent(e.id)}">${esc(e.model)}</a>` : esc(e.model);
+      const isPartial = !!e.partial;
+      const name = (isReal || isPartial) ? `<a href="model.html?id=${encodeURIComponent(e.id)}">${esc(e.model)}</a>` : esc(e.model);
+      const badge = isPartial ? ` <span class="pill" title="Well-formed package that does not yet cover all 28 cells. Shown per scenario only, never ranked.">incomplete · ${esc(e.validation.cells_complete)} cells</span>` : "";
       const meta = `${esc(e.creator)} · ${esc(e.detector)} · ${esc(e.fusion_mode)} · ${esc(e.controller_profile)}`;
       const abs = k => isReal ? fmt(absOverall(e, k), k === "task_completion.route_completion" ? 3 : k === "safety.collision_count" ? 2 : 1) : `<span class="dash">--</span>`;
-      const prov = isReal ? `${e.n_runs} <span class="dash">/ 28 cells</span>` : `<a class="btn ghost small" href="submit.html">Submit results</a>`;
-      const verified = isReal ? `<span class="pill">✓ hash-verified</span>` : `<span class="dash">--</span>`;
-      return `<tr class="${isReal ? "" : "pending"}">
-        <td class="model"><span class="ranknum num">${isReal ? e.rank : ""}</span><span class="bar" style="background:${isReal ? e.color : "var(--line-strong)"}"></span>${name}<span class="meta">${meta}</span></td>
+      const prov = isReal ? `${e.n_runs} <span class="dash">/ 28 cells</span>`
+        : isPartial ? `${e.n_runs} <span class="dash">runs · ${esc(e.validation.cells_complete)} cells</span>`
+        : `<a class="btn ghost small" href="submit.html">Submit results</a>`;
+      const verified = (isReal || isPartial) ? `<span class="pill">✓ per-run sha256</span>` : `<span class="dash">--</span>`;
+      return `<tr class="${isReal ? "" : isPartial ? "partial" : "pending"}">
+        <td class="model"><span class="ranknum num">${isReal ? e.rank : ""}</span><span class="bar" style="background:${isReal || isPartial ? e.color : "var(--line-strong)"}"></span>${name}${badge}<span class="meta">${meta}</span></td>
         <td class="grp-start">${scoreCell(e, "cdb_index", true)}</td>
         <td>${scoreCell(e, "safety")}</td>
         <td>${scoreCell(e, "comfort")}</td>
@@ -125,7 +131,7 @@
       th.classList.remove("sorted-desc", "sorted-asc");
       if (th.dataset.sort === state.sort) th.classList.add(state.dir === "desc" ? "sorted-desc" : "sorted-asc");
     });
-    const c = $("#lb-count"); if (c) c.textContent = `${rows.filter(r => r.scores).length} scored · ${rows.filter(r => !r.scores).length} pending of ${D.entries.length} entries`;
+    const c = $("#lb-count"); if (c) c.textContent = `${rows.filter(r => r.scores).length} ranked · ${rows.filter(r => r.partial).length} incomplete · ${rows.filter(r => !r.scores && !r.partial).length} not yet submitted`;
   }
 
   function wireTable() {
@@ -196,7 +202,7 @@
     const ms = D.metrics.filter(m => m.axis === axis);
     const s = SCN[scn];
     el.innerHTML = `<h3>${esc(s.display)} · ${AXIS[axis]} <span class="pill" style="margin-left:6px">${fmt(ps.axes[axis], 0)}</span></h3>
-      <p class="sub">Cell means at S0–S3 (n = 5 accepted runs each). Retention r per metric: 1 − clip(worsening ÷ scale). Dashed line = S0 baseline; red points are worse than S0 in the metric's direction, green are not.</p>
+      <p class="sub">Cell means at S0–S3 over the accepted runs in each cell. Retention r per metric: 1 − clip(worsening ÷ scale). Dashed line = S0 baseline; red points are worse than S0 in the metric's direction, green are not.</p>
       <div class="curves">${ms.map(m => {
         const pm = ps.metrics[m.key] || {};
         const r = pm.retention;
@@ -207,10 +213,13 @@
   /* ---------- updates list / meta ---------- */
   function renderUpdates() {
     const el = $("#updates"); if (!el) return;
-    el.innerHTML = D.updates.map(u => `<div class="update"><div><div class="eyebrow">Update · ${esc(u.date)}</div><div class="title">${esc(u.title)}</div><div class="text">${esc(u.text)}</div></div><div class="arrow">↗</div></div>`).join("");
+    const items = D.updates || [];
+    if (!items.length) { el.hidden = true; return; }
+    el.innerHTML = `<div class="eyebrow updates-head">Latest submissions</div>` + items.slice(0, 4).map(u =>
+      `<a class="update" href="model.html?id=${encodeURIComponent(u.entry_id)}"><div><div class="eyebrow">New submission · ${esc(u.date)}</div><div class="title">${esc(u.title)}</div><div class="text">${esc(u.text)}</div></div><div class="arrow">↗</div></a>`).join("");
   }
   function renderMeta() {
-    document.querySelectorAll("[data-generated]").forEach(el => el.textContent = (D.generated_at_utc || "").slice(0, 10));
+    document.querySelectorAll("[data-generated]").forEach(el => el.textContent = D.last_submission_utc ? D.last_submission_utc.slice(0, 10) : "none yet");
     document.querySelectorAll("[data-spec]").forEach(el => el.textContent = D.spec_version);
   }
 
@@ -219,13 +228,15 @@
     const root = $("#model-page"); if (!root) return;
     const id = new URLSearchParams(location.search).get("id") || (real[0] && real[0].id);
     const e = D.entries.find(x => x.id === id);
-    if (!e || !e.scores) { root.innerHTML = `<p>No scored entry <code>${esc(id || "")}</code>. <a href="index.html">Back to the leaderboard</a>.</p>`; return; }
+    if (!e || (!e.scores && !e.partial)) { root.innerHTML = `<p>No scored entry <code>${esc(id || "")}</code>. <a href="index.html">Back to the leaderboard</a>.</p>`; return; }
     document.title = `${e.model} — CDB`;
     $("#m-title").textContent = e.model;
     $("#m-sub").innerHTML = `${esc(e.creator)} · detector <code>${esc(e.detector)}</code> · fusion <code>${esc(e.fusion_mode)}</code> · controller <code>${esc(e.controller_profile)}</code> · stack <code>${esc(e.stack_version)}</code>${e.entry && e.entry.commit ? ` · commit <code>${esc(e.entry.commit)}</code>` : ""}`;
     $("#m-notes").textContent = e.notes || "";
     const tiles = $("#m-tiles");
-    tiles.innerHTML = ["cdb_index", "safety", "comfort", "operation"].map(k => `<div class="card"><div class="card-title"><h3><span class="swatch" style="background:${AXIS_COLOR[k]}"></span>${k === "cdb_index" ? "CDB Index" : AXIS[k]}</h3>${k === "cdb_index" ? `<span class="pill accent">Rank #${e.rank}</span>` : ""}</div><div class="num" style="font-size:44px;font-family:var(--serif);line-height:1">${fmt(e.scores[k], 1)}</div><div class="desc">95 % bootstrap interval ${ciText(e, k) || "n/a"} · ${k === "cdb_index" ? "equal-weight mean of the three axes" : `${D.metrics.filter(m => m.axis === k).length} metrics × 7 scenarios`}</div></div>`).join("");
+    if (e.partial) {
+      tiles.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="card-title"><h3>Incomplete submission — not ranked</h3><span class="pill">${esc(e.validation.cells_complete)} cells</span></div><p class="desc">This package is well formed but covers only part of the 28 cells (7 traffic situations × 4 levels × 5 repeats). A total score would compare it unfairly with complete entries, so only the situations that have a baseline and all three degraded levels are scored below. ${e.n_runs} runs were received.</p></div>`;
+    } else tiles.innerHTML = ["cdb_index", "safety", "comfort", "operation"].map(k => `<div class="card"><div class="card-title"><h3><span class="swatch" style="background:${AXIS_COLOR[k]}"></span>${k === "cdb_index" ? "CDB Index" : AXIS[k]}</h3>${k === "cdb_index" ? `<span class="pill accent">Rank #${e.rank}</span>` : ""}</div><div class="num" style="font-size:44px;font-family:var(--serif);line-height:1">${fmt(e.scores[k], 1)}</div><div class="desc">95 % bootstrap interval ${ciText(e, k) || "n/a"} · ${k === "cdb_index" ? "equal-weight mean of the three axes" : `${D.metrics.filter(m => m.axis === k).length} metrics × 7 scenarios`}</div></div>`).join("");
     heatTable($("#m-heat"), e, $("#m-detail"));
     // absolute table S0 vs S3
     const absKeys = D.metrics.filter(m => m.absolute_column);
@@ -237,7 +248,7 @@
     $("#m-abs").innerHTML = t;
     // provenance
     const p = e.provenance || {};
-    $("#m-prov").innerHTML = `<dl class="kv"><dt>Runs</dt><dd>${e.n_runs} accepted (${e.validation.cells_complete} cells, 5 unique repeats each)</dd><dt>Evidence snapshot</dt><dd><code>${esc(p.evidence_snapshot || "")}</code></dd><dt>Hash verification</dt><dd>${esc(p.hashes_verified || "")}</dd><dt>Source manifest sha256</dt><dd><code>${esc((p.source_manifest_sha256 || "").slice(0, 16))}…</code></dd><dt>Validator</dt><dd>${esc(e.validation.status)} · ${e.validation.warnings} warnings (TTC not applicable on the curve; route completion undefined for the controlled stop)</dd><dt>Score spec</dt><dd><code>${esc(D.spec_version)}</code></dd></dl>`;
+    $("#m-prov").innerHTML = `<dl class="kv"><dt>Runs</dt><dd>${e.n_runs} accepted (${e.validation.cells_complete} complete cells)</dd><dt>Evidence</dt><dd><code>${esc(p.evidence_snapshot || p.runs_root || "")}</code></dd><dt>Hash verification</dt><dd>${esc(p.hashes_verified || p.hashes || "")}</dd>${p.source_manifest_sha256 ? `<dt>Source manifest sha256</dt><dd><code>${esc(p.source_manifest_sha256.slice(0, 16))}…</code></dd>` : ""}${e.submission_url ? `<dt>Submitted</dt><dd><a href="${esc(e.submission_url)}">${esc((e.submitted_at || "").slice(0, 10))} · submission issue</a></dd>` : ""}<dt>Validator</dt><dd>${esc(e.validation.status)} · ${e.validation.warnings} warnings (usually: time-to-collision is undefined where no other road user is present)</dd><dt>Score spec</dt><dd><code>${esc(D.spec_version)}</code></dd></dl>`;
     // run scatter
     scatter($("#m-scatter"), e);
   }
@@ -288,7 +299,7 @@
   renderMeta(); renderUpdates();
   ["safety", "comfort", "operation"].forEach(a => { const el = $(`#chart-${a}`); if (el) barChart(el, a); });
   wireTable();
-  if ($("#heat")) heatTable($("#heat"), real[0], $("#heat-detail"));
-  const hs = $("#heat-entry"); if (hs) { hs.innerHTML = real.map(e => `<option value="${e.id}">${esc(e.model)}</option>`).join(""); hs.addEventListener("change", () => heatTable($("#heat"), D.entries.find(x => x.id === hs.value), $("#heat-detail"))); }
+  if ($("#heat")) heatTable($("#heat"), withScenarios[0], $("#heat-detail"));
+  const hs = $("#heat-entry"); if (hs) { hs.innerHTML = withScenarios.map(e => `<option value="${e.id}">${esc(e.model)}${e.partial ? " (incomplete)" : ""}</option>`).join(""); hs.addEventListener("change", () => heatTable($("#heat"), D.entries.find(x => x.id === hs.value), $("#heat-detail"))); }
   modelPage(); toc();
 })();

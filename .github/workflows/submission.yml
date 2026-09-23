@@ -1,0 +1,92 @@
+name: Submission intake
+
+# Runs when someone opens or edits a "Submit results" issue.
+# Validates and scores the linked package, replies on the issue, and (if the package is
+# well formed) opens a pull request that adds the entry. Nothing from the issue is executed.
+on:
+  issues:
+    types: [opened, edited, reopened]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: submission-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  intake:
+    if: contains(github.event.issue.labels.*.name, 'submission') && github.event.issue.state == 'open'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate and score the linked package
+        id: intake
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+          SUBMITTED_AT: ${{ github.event.issue.created_at }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/intake"
+          printf '%s' "$ISSUE_BODY" > "$RUNNER_TEMP/intake/body.md"
+          python -m cdb_score.intake --issue-body "$RUNNER_TEMP/intake/body.md" \
+            --issue-url "$ISSUE_URL" --submitted-at "$SUBMITTED_AT" --workdir "$RUNNER_TEMP/intake"
+          python - "$RUNNER_TEMP/intake/result.json" >> "$GITHUB_OUTPUT" <<'PY'
+          import json, re, sys
+          r = json.load(open(sys.argv[1]))
+          eid = r.get("entry_id") or ""
+          print("status=" + r["status"])
+          print("entry_id=" + (eid if re.fullmatch(r"[a-z0-9][a-z0-9._-]{2,79}", eid) else ""))
+          PY
+
+      - name: Open or update the pull request
+        if: steps.intake.outputs.status == 'PASS' || steps.intake.outputs.status == 'PARTIAL'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ENTRY_ID: ${{ steps.intake.outputs.entry_id }}
+          STATUS: ${{ steps.intake.outputs.status }}
+          ISSUE: ${{ github.event.issue.number }}
+        run: |
+          test -n "$ENTRY_ID"
+          branch="submission/$ENTRY_ID"
+          git config user.name "cdb-leaderboard-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$branch"
+          mkdir -p "submissions/$ENTRY_ID"
+          cp "$RUNNER_TEMP/intake/package.json" "submissions/$ENTRY_ID/package.json"
+          python -m cdb_score.intake register --registry registry/models.json --entry "$RUNNER_TEMP/intake/registry_entry.json"
+          python -m cdb_score build --no-ci --out "$RUNNER_TEMP/preview.json"
+          git add "submissions/$ENTRY_ID/package.json" registry/models.json
+          git commit -m "Add submission $ENTRY_ID ($STATUS) from #$ISSUE"
+          git push --force origin "$branch"
+          if ! gh pr view "$branch" --json number >/dev/null 2>&1; then
+            gh pr create --base main --head "$branch" \
+              --title "Submission: $ENTRY_ID ($STATUS)" \
+              --body "Adds \`$ENTRY_ID\` from #$ISSUE. Validation status: **$STATUS**. Merging this pull request rebuilds the leaderboard. Closes #$ISSUE."
+          fi
+
+      - name: Reply on the issue
+        if: always() && steps.intake.outcome != 'skipped'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ github.event.issue.number }}
+          STATUS: ${{ steps.intake.outputs.status }}
+        run: |
+          if [ -f "$RUNNER_TEMP/intake/comment.md" ]; then
+            gh issue comment "$ISSUE" --body-file "$RUNNER_TEMP/intake/comment.md"
+          else
+            gh issue comment "$ISSUE" --body "The automatic check crashed before it could read the package. A maintainer has been notified by the failed workflow run."
+          fi
+          if [ "$STATUS" = "FAIL" ]; then
+            gh issue edit "$ISSUE" --add-label needs-fix || true
+          else
+            gh issue edit "$ISSUE" --remove-label needs-fix || true
+          fi
